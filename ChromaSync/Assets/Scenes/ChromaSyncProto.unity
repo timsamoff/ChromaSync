@@ -462,8 +462,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58f2a08683f22b14d9197bb4853a5e40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animationSpeed: 1
+  animationSpeed: 0.5
   waitTime: 0.1
+  incrementValue: 10
   red: 0
   green: 0
   blue: 0
