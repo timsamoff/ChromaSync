@@ -4,9 +4,11 @@ using UnityEngine.Windows.Speech;
 
 public class VoiceDetection : MonoBehaviour
 {
+    [Header("Game Settings")]
     [SerializeField] private float animationSpeed = 1.0f;
     [SerializeField] private float waitTime = 0.1f;
     [SerializeField] private float incrementValue = 10.0f; // Default incrementValue value
+    [SerializeField] private GameObject gObj;
 
     [Header("Color Channels (0-255)")]
     [SerializeField] private int red = 0;
@@ -18,7 +20,6 @@ public class VoiceDetection : MonoBehaviour
     private bool isChangingColor = false; // Flag to track whether color changes are in progress
     private int changeDirection = 1; // 1 for increase, -1 for decrease
 
-    [SerializeField] private GameObject gObj;
     private Material originalMaterial;
     private Color currentColor = Color.black;
 
