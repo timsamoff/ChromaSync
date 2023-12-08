@@ -1,14 +1,14 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Windows.Speech;
 
 public class VoiceDetection : MonoBehaviour
 {
+    [Header("Game Settings")]
     [SerializeField] private float animationSpeed = 1.0f;
     [SerializeField] private float waitTime = 0.1f;
+    [SerializeField] private float incrementValue = 10.0f; // Default incrementValue value
+    [SerializeField] private GameObject gObj;
 
     [Header("Color Channels (0-255)")]
     [SerializeField] private int red = 0;
@@ -17,8 +17,9 @@ public class VoiceDetection : MonoBehaviour
 
     private KeywordRecognizer keywordRecognizer;
     private bool isListening = false;
+    private bool isChangingColor = false; // Flag to track whether color changes are in progress
+    private int changeDirection = 1; // 1 for increase, -1 for decrease
 
-    [SerializeField] private GameObject gObj;
     private Material originalMaterial;
     private Color currentColor = Color.black;
 
@@ -29,7 +30,7 @@ public class VoiceDetection : MonoBehaviour
 
         gObj.GetComponent<Renderer>().material = originalMaterial;
 
-        keywordRecognizer = new KeywordRecognizer(new string[] { "morered", "lessred", "moregreen", "lessgreen", "moreblue", "lessblue", "more", "less", "red", "green", "blue" });
+        keywordRecognizer = new KeywordRecognizer(new string[] { "morered", "lessred", "moregreen", "lessgreen", "moreblue", "lessblue", "more", "less", "red", "green", "blue", "stop" });
         keywordRecognizer.OnPhraseRecognized += RecognizedSpeech;
 
         StartListening();
@@ -51,25 +52,28 @@ public class VoiceDetection : MonoBehaviour
 
         string currentWord = speech.text;
 
-        float increment = 10.0f; // Default increment value
-
         if (currentWord.StartsWith("less"))
         {
-            increment = -10.0f;
+            changeDirection = -1; // Set the change direction to decrease
+        }
+        else
+        {
+            changeDirection = 1; // Set the change direction to increase
         }
 
         if (currentWord.Contains("red"))
         {
-            IncrementColor('r', increment);
+            StartColorChange('r', incrementValue * changeDirection);
         }
         else if (currentWord.Contains("green"))
         {
-            IncrementColor('g', increment);
+            StartColorChange('g', incrementValue * changeDirection);
         }
         else if (currentWord.Contains("blue"))
         {
-            IncrementColor('b', increment);
+            StartColorChange('b', incrementValue * changeDirection);
         }
+
         else if (currentWord == "more")
         {
             // Handle "more" separately
@@ -80,11 +84,38 @@ public class VoiceDetection : MonoBehaviour
             // Handle "less" separately
             Debug.Log("Do something for 'less'...");
         }
+        else if (currentWord == "stop")
+        {
+            StopColorChange();
+        }
     }
 
-    private void IncrementColor(char axis, float increment)
+    private void StartColorChange(char axis, float increment)
     {
-        StartCoroutine(ChangeColorAnimation(axis, increment));
+        if (!isChangingColor)
+        {
+            isChangingColor = true;
+            StartCoroutine(ChangeColorContinuously(axis, increment));
+        }
+    }
+
+    private void StopColorChange()
+    {
+        if (isChangingColor)
+        {
+            isChangingColor = false;
+            StopAllCoroutines(); // Stop the color change coroutine
+            Debug.Log("Color change stopped.");
+        }
+    }
+
+    private IEnumerator ChangeColorContinuously(char axis, float increment)
+    {
+        while (isChangingColor)
+        {
+            yield return StartCoroutine(ChangeColorAnimation(axis, increment));
+            yield return null; // Ensure a frame is rendered before the next iteration
+        }
     }
 
     private IEnumerator ChangeColorAnimation(char axis, float increment)
