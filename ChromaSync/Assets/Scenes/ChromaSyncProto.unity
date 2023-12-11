@@ -462,13 +462,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58f2a08683f22b14d9197bb4853a5e40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animationSpeed: 0.5
-  waitTime: 0.1
-  incrementValue: 10
+  animationSpeed: 20
+  gObj: {fileID: 1417352525}
   red: 0
   green: 0
   blue: 0
-  gObj: {fileID: 1417352525}
 --- !u!4 &1575953982
 Transform:
   m_ObjectHideFlags: 0
