@@ -7,8 +7,9 @@ public class VoiceDetection : MonoBehaviour
     [Header("Game Settings")]
     [SerializeField] private float animationSpeed = 1.0f;
     [SerializeField] private float waitTime = 0.1f;
-    [SerializeField] private float incrementValue = 10.0f; // Default incrementValue value
     [SerializeField] private GameObject gObj;
+    private Material originalMaterial;
+    private Color currentColor = Color.black;
 
     [Header("Color Channels (0-255)")]
     [SerializeField] private int red = 0;
@@ -17,11 +18,7 @@ public class VoiceDetection : MonoBehaviour
 
     private KeywordRecognizer keywordRecognizer;
     private bool isListening = false;
-    private bool isChangingColor = false; // Flag to track whether color changes are in progress
-    private int changeDirection = 1; // 1 for increase, -1 for decrease
-
-    private Material originalMaterial;
-    private Color currentColor = Color.black;
+    private string lastCommand = null;
 
     private void Start()
     {
@@ -52,70 +49,49 @@ public class VoiceDetection : MonoBehaviour
 
         string currentWord = speech.text;
 
-        if (currentWord.StartsWith("less"))
+        if (lastCommand == "more" || lastCommand == "less")
         {
-            changeDirection = -1; // Set the change direction to decrease
+            // Only allow "red", "green", or "blue" after "more" or "less"
+            if (currentWord == "red" || currentWord == "green" || currentWord == "blue")
+            {
+                HandleColorCommand(currentWord);
+                lastCommand = currentWord;
+            }
+            else
+            {
+                Debug.Log($"Invalid command after {lastCommand}. Expected: red, green, blue.");
+            }
+        }
+        else if (lastCommand == "red" || lastCommand == "green" || lastCommand == "blue")
+        {
+            // Only allow "stop" after "red", "green", or "blue"
+            if (currentWord == "stop" || currentWord == "top" || currentWord == "opp")
+            {
+                lastCommand = null; // Reset last command
+            }
+            else
+            {
+                Debug.Log($"Invalid command after {lastCommand}. Expected: stop, top, opp.");
+            }
         }
         else
         {
-            changeDirection = 1; // Set the change direction to increase
-        }
-
-        if (currentWord.Contains("red"))
-        {
-            StartColorChange('r', incrementValue * changeDirection);
-        }
-        else if (currentWord.Contains("green"))
-        {
-            StartColorChange('g', incrementValue * changeDirection);
-        }
-        else if (currentWord.Contains("blue"))
-        {
-            StartColorChange('b', incrementValue * changeDirection);
-        }
-
-        else if (currentWord == "more")
-        {
-            // Handle "more" separately
-            Debug.Log("Do something for 'more'...");
-        }
-        else if (currentWord == "less")
-        {
-            // Handle "less" separately
-            Debug.Log("Do something for 'less'...");
-        }
-        else if (currentWord == "stop" || currentWord == "top" || currentWord == "opp")
-        {
-            StopColorChange();
+            // Handle "more" or "less" commands
+            lastCommand = currentWord;
         }
     }
 
-    private void StartColorChange(char axis, float increment)
+    private void HandleColorCommand(string color)
     {
-        if (!isChangingColor)
-        {
-            isChangingColor = true;
-            StartCoroutine(ChangeColorContinuously(axis, increment));
-        }
+        float increment = (lastCommand == "more") ? 10.0f : -10.0f;
+        char axis = color[0];
+
+        IncrementColor(axis, increment);
     }
 
-    private void StopColorChange()
-{
-    if (isChangingColor)
+    private void IncrementColor(char axis, float increment)
     {
-        isChangingColor = false;
-        Debug.Log("Color change stopped.");
-    }
-}
-
-
-    private IEnumerator ChangeColorContinuously(char axis, float increment)
-    {
-        while (isChangingColor)
-        {
-            yield return StartCoroutine(ChangeColorAnimation(axis, increment));
-            yield return null; // Ensure a frame is rendered before the next iteration
-        }
+        StartCoroutine(ChangeColorAnimation(axis, increment));
     }
 
     private IEnumerator ChangeColorAnimation(char axis, float increment)
@@ -159,20 +135,6 @@ public class VoiceDetection : MonoBehaviour
 
         yield return new WaitForSeconds(waitTime);
 
-        StopListening();
-
-        yield return new WaitForSeconds(waitTime);
-
         StartListening();
-    }
-
-    private void StopListening()
-    {
-        if (isListening)
-        {
-            keywordRecognizer.Stop();
-            isListening = false;
-            Debug.Log("Stopped listening...");
-        }
     }
 }
