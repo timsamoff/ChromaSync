@@ -6,7 +6,6 @@ public class VoiceDetection : MonoBehaviour
 {
     [Header("Game Settings")]
     [SerializeField] private float animationSpeed = 1.0f;
-    [SerializeField] private float waitTime = 0.1f;
     [SerializeField] private GameObject gObj;
     private Material originalMaterial;
     private Color currentColor = Color.black;
@@ -19,6 +18,9 @@ public class VoiceDetection : MonoBehaviour
     private KeywordRecognizer keywordRecognizer;
     private bool isListening = false;
     private string lastCommand = null;
+    private char currentAxis = 'r'; // Default to red
+
+    private Coroutine colorAnimationCoroutine;
 
     private void Start()
     {
@@ -49,92 +51,122 @@ public class VoiceDetection : MonoBehaviour
 
         string currentWord = speech.text;
 
-        if (lastCommand == "more" || lastCommand == "less")
+        if (currentWord == "stop" || currentWord == "top" || currentWord == "opp")
+        {
+            StopColorAnimation();
+        }
+        else if (currentWord == "more" || currentWord == "less")
+        {
+            lastCommand = currentWord;
+            currentAxis = ' '; // Reset currentAxis to allow color to be selected in the next command
+        }
+        else if (currentWord.StartsWith("more") || currentWord.StartsWith("less"))
+        {
+            // Handle single keywords "morered," "lessred," etc.
+            if (lastCommand != null && lastCommand != "stop" && lastCommand != "top" && lastCommand != "opp")
+            {
+                Debug.Log($"Invalid command. Expected: stop, top, opp.");
+            }
+            else
+            {
+                HandleColorCommand(currentWord);
+            }
+        }
+        else if (lastCommand == "more" || lastCommand == "less")
         {
             // Only allow "red", "green", or "blue" after "more" or "less"
             if (currentWord == "red" || currentWord == "green" || currentWord == "blue")
             {
-                HandleColorCommand(currentWord);
-                lastCommand = currentWord;
+                lastCommand += currentWord; // Combine "more" or "less" with the color
+                currentAxis = currentWord[0];
+                StartColorAnimation();
             }
             else
             {
                 Debug.Log($"Invalid command after {lastCommand}. Expected: red, green, blue.");
             }
         }
-        else if (lastCommand == "red" || lastCommand == "green" || lastCommand == "blue")
-        {
-            // Only allow "stop" after "red", "green", or "blue"
-            if (currentWord == "stop" || currentWord == "top" || currentWord == "opp")
-            {
-                lastCommand = null; // Reset last command
-            }
-            else
-            {
-                Debug.Log($"Invalid command after {lastCommand}. Expected: stop, top, opp.");
-            }
-        }
-        else
-        {
-            // Handle "more" or "less" commands
-            lastCommand = currentWord;
-        }
     }
 
     private void HandleColorCommand(string color)
     {
-        float increment = (lastCommand == "more") ? 10.0f : -10.0f;
-        char axis = color[0];
-
-        IncrementColor(axis, increment);
+        lastCommand = color;
+        currentAxis = color.Substring(4)[0]; // Extract color channel from "morered," "lessred," etc.
+        StartColorAnimation();
     }
 
-    private void IncrementColor(char axis, float increment)
+    private void StopColorAnimation()
     {
-        StartCoroutine(ChangeColorAnimation(axis, increment));
-    }
-
-    private IEnumerator ChangeColorAnimation(char axis, float increment)
-    {
-        float duration = animationSpeed;
-        float elapsedTime = 0f;
-
-        float incrementValue = increment / 255f;
-
-        switch (axis)
+        if (colorAnimationCoroutine != null)
         {
-            case 'r':
-                red += Mathf.RoundToInt(incrementValue * 255f);
-                red = Mathf.Clamp(red, 0, 255);
-                break;
-            case 'g':
-                green += Mathf.RoundToInt(incrementValue * 255f);
-                green = Mathf.Clamp(green, 0, 255);
-                break;
-            case 'b':
-                blue += Mathf.RoundToInt(incrementValue * 255f);
-                blue = Mathf.Clamp(blue, 0, 255);
-                break;
+            StopCoroutine(colorAnimationCoroutine);
         }
 
-        currentColor = new Color(red / 255f, green / 255f, blue / 255f);
+        // Require saying "stop" after "more" or "less" followed by the color
+        lastCommand = "stop";
 
-        Color initialColor = gObj.GetComponent<Renderer>().material.color;
-        Color targetColor = new Color(red / 255f, green / 255f, blue / 255f);
-
-        while (elapsedTime < duration)
-        {
-            gObj.GetComponent<Renderer>().material.color = Color.Lerp(initialColor, targetColor, elapsedTime / duration);
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
-
-        gObj.GetComponent<Renderer>().material.color = targetColor;
-
-        Debug.Log($"Increment Values: R = {red}, G = {green}, B = {blue}");
-
-        yield return new WaitForSeconds(waitTime);
-
+        // Continue listening after the animation stops
         StartListening();
+    }
+
+    private IEnumerator ContinuousColorAnimation()
+    {
+        float increment = (lastCommand.StartsWith("more")) ? 1.0f : -1.0f;
+
+        while (lastCommand.StartsWith("more") || lastCommand.StartsWith("less"))
+        {
+            float incrementValue = increment / 255f;
+
+            switch (currentAxis)
+            {
+                case 'r':
+                    red += Mathf.RoundToInt(incrementValue * 255f);
+                    red = Mathf.Clamp(red, 0, 255);
+                    break;
+                case 'g':
+                    green += Mathf.RoundToInt(incrementValue * 255f);
+                    green = Mathf.Clamp(green, 0, 255);
+                    break;
+                case 'b':
+                    blue += Mathf.RoundToInt(incrementValue * 255f);
+                    blue = Mathf.Clamp(blue, 0, 255);
+                    break;
+                case ' ':
+                    break;
+            }
+
+            currentColor = new Color(red / 255f, green / 255f, blue / 255f);
+
+            gObj.GetComponent<Renderer>().material.color = currentColor;
+
+            Debug.Log($"Increment Values: R = {red}, G = {green}, B = {blue}");
+
+            yield return new WaitForSeconds(animationSpeed / 255f);
+        }
+
+        // Stop listening after the animation stops
+        StopListening();
+    }
+
+    private void StartColorAnimation()
+    {
+        if (colorAnimationCoroutine != null)
+        {
+            // Stop the existing coroutine if it is running
+            StopCoroutine(colorAnimationCoroutine);
+        }
+
+        // Start a new coroutine for continuous color animation
+        colorAnimationCoroutine = StartCoroutine(ContinuousColorAnimation());
+    }
+
+    private void StopListening()
+    {
+        if (isListening)
+        {
+            keywordRecognizer.Stop();
+            isListening = false;
+            Debug.Log("Stopped listening...");
+        }
     }
 }
