@@ -30,7 +30,7 @@ public class VoiceDetection : MonoBehaviour
 
         gObj.GetComponent<Renderer>().material = originalMaterial;
 
-        keywordRecognizer = new KeywordRecognizer(new string[] { "morered", "lessred", "moregreen", "lessgreen", "moreblue", "lessblue", "more", "less", "red", "green", "blue", "stop" });
+        keywordRecognizer = new KeywordRecognizer(new string[] { "morered", "lessred", "moregreen", "lessgreen", "moreblue", "lessblue", "more", "less", "red", "green", "blue", "stop", "top", "opp" });
         keywordRecognizer.OnPhraseRecognized += RecognizedSpeech;
 
         StartListening();
@@ -84,7 +84,7 @@ public class VoiceDetection : MonoBehaviour
             // Handle "less" separately
             Debug.Log("Do something for 'less'...");
         }
-        else if (currentWord == "stop")
+        else if (currentWord == "stop" || currentWord == "top" || currentWord == "opp")
         {
             StopColorChange();
         }
@@ -100,14 +100,14 @@ public class VoiceDetection : MonoBehaviour
     }
 
     private void StopColorChange()
+{
+    if (isChangingColor)
     {
-        if (isChangingColor)
-        {
-            isChangingColor = false;
-            StopAllCoroutines(); // Stop the color change coroutine
-            Debug.Log("Color change stopped.");
-        }
+        isChangingColor = false;
+        Debug.Log("Color change stopped.");
     }
+}
+
 
     private IEnumerator ChangeColorContinuously(char axis, float increment)
     {
