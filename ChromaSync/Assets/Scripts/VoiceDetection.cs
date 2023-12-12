@@ -117,8 +117,8 @@ public class VoiceDetection : MonoBehaviour
         // Continue listening after the animation stops
         StartListening();
 
-        // Stop all sounds
-        soundManager.StopAll();
+        // Stop all sounds using the new method
+        soundManager.StopAllSounds();
     }
 
     private IEnumerator ContinuousColorAnimation()
@@ -167,6 +167,9 @@ public class VoiceDetection : MonoBehaviour
             // Stop the existing coroutine if it is running
             StopCoroutine(colorAnimationCoroutine);
         }
+
+        // Play the sound before starting the animation
+        PlaySound();
 
         // Start a new coroutine for continuous color animation
         colorAnimationCoroutine = StartCoroutine(ContinuousColorAnimation());
