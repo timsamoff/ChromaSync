@@ -22,6 +22,9 @@ public class VoiceDetection : MonoBehaviour
 
     private Coroutine colorAnimationCoroutine;
 
+    // Reference to the SoundManager script
+    private SoundManager soundManager;
+
     private void Start()
     {
         originalMaterial = new Material(Shader.Find("Standard"));
@@ -31,6 +34,9 @@ public class VoiceDetection : MonoBehaviour
 
         keywordRecognizer = new KeywordRecognizer(new string[] { "morered", "lessred", "moregreen", "lessgreen", "moreblue", "lessblue", "more", "less", "red", "green", "blue", "stop", "top", "opp" });
         keywordRecognizer.OnPhraseRecognized += RecognizedSpeech;
+
+        // Get the SoundManager script attached to this GameObject
+        soundManager = GetComponent<SoundManager>();
 
         StartListening();
     }
@@ -93,6 +99,9 @@ public class VoiceDetection : MonoBehaviour
         lastCommand = color;
         currentAxis = color.Substring(4)[0]; // Extract color channel from "morered," "lessred," etc.
         StartColorAnimation();
+
+        // Play the corresponding sound based on the color command
+        PlaySound();
     }
 
     private void StopColorAnimation()
@@ -107,6 +116,9 @@ public class VoiceDetection : MonoBehaviour
 
         // Continue listening after the animation stops
         StartListening();
+
+        // Stop all sounds
+        soundManager.StopAll();
     }
 
     private IEnumerator ContinuousColorAnimation()
@@ -158,6 +170,41 @@ public class VoiceDetection : MonoBehaviour
 
         // Start a new coroutine for continuous color animation
         colorAnimationCoroutine = StartCoroutine(ContinuousColorAnimation());
+    }
+
+    private void PlaySound()
+    {
+        // Play the corresponding sound based on color and direction
+        if (lastCommand.StartsWith("more"))
+        {
+            switch (currentAxis)
+            {
+                case 'r':
+                    soundManager.PlayRedLoopFwd();
+                    break;
+                case 'g':
+                    soundManager.PlayGreenLoopFwd();
+                    break;
+                case 'b':
+                    soundManager.PlayBlueLoopFwd();
+                    break;
+            }
+        }
+        else if (lastCommand.StartsWith("less"))
+        {
+            switch (currentAxis)
+            {
+                case 'r':
+                    soundManager.PlayRedLoopRev();
+                    break;
+                case 'g':
+                    soundManager.PlayGreenLoopRev();
+                    break;
+                case 'b':
+                    soundManager.PlayBlueLoopRev();
+                    break;
+            }
+        }
     }
 
     private void StopListening()
