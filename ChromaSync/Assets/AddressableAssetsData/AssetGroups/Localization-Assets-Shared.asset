@@ -23,7 +23,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 806269a5f2aac7e449f2399f46c1a5ad
-    m_Address: Assets/Resources/VoiceCommandLocalization Shared Data.asset
+    m_Address: Assets/Resources/Localization/VoiceCommandLocalization Shared Data.asset
     m_ReadOnly: 1
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
