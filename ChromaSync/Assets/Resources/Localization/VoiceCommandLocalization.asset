@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5be51871efa6c3e4eae1703925c8f5ac, type: 3}
+  m_Name: VoiceCommandLocalization
+  m_EditorClassIdentifier: 
+  m_SharedTableData: {fileID: 11400000, guid: 806269a5f2aac7e449f2399f46c1a5ad, type: 2}
+  m_Tables:
+  - {fileID: 11400000, guid: 45b7819a9ad1fe341b7854373e744844, type: 2}
+  - {fileID: 11400000, guid: 61b7e545b8c913c46bb45decd63a3290, type: 2}
+  - {fileID: 11400000, guid: e7cfcdd6098bf124b9411a83ad09f0ae, type: 2}
+  - {fileID: 11400000, guid: 26b5ac29bb6e0d945b82b922b4404185, type: 2}
+  - {fileID: 11400000, guid: 4884da21da3c098449472297a5723c79, type: 2}
+  - {fileID: 11400000, guid: 0bd9aed4f77700d41a2a95fd6201cb14, type: 2}
+  m_Extensions: []
+  m_Group: String Table
+  references:
+    version: 2
+    RefIds: []
