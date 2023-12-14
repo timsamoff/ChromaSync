@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Windows.Speech;
 using UnityEngine.Localization.Settings;
+using UnityEngine.Localization;
 
 public class VoiceDetection : MonoBehaviour
 {
@@ -31,6 +32,21 @@ public class VoiceDetection : MonoBehaviour
 
     private void Awake()
     {
+        UpdateLocalizedKeys();
+
+        // Subscribe to the event to update keys when the locale changes
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+    }
+
+    private void OnSelectedLocaleChanged(Locale newLocale)
+    {
+        UpdateLocalizedKeys();
+    }
+
+    private void UpdateLocalizedKeys()
+    {
+        Locale currentSelectedLocale = LocalizationSettings.SelectedLocale;
+
         moreKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "more");
         lessKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "less");
         stopKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "stop");
@@ -44,6 +60,7 @@ public class VoiceDetection : MonoBehaviour
         lessGreenKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "lessgreen");
         lessBlueKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "lessblue");
     }
+
     private void Start()
     {
         originalMaterial = new Material(Shader.Find("Standard"));
@@ -237,5 +254,11 @@ public class VoiceDetection : MonoBehaviour
             isListening = false;
             Debug.Log("Stopped listening...");
         }
+    }
+
+    private void OnDestroy()
+    {
+        // Unsubscribe from the event when the script is destroyed
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
     }
 }

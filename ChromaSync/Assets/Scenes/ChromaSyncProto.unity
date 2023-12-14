@@ -445,6 +445,7 @@ GameObject:
   - component: {fileID: 1575953983}
   - component: {fileID: 1575953985}
   - component: {fileID: 1575953984}
+  - component: {fileID: 1575953986}
   m_Layer: 0
   m_Name: GameSession
   m_TagString: Untagged
@@ -604,13 +605,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44f8fc90e78501746b9767dcdc1ab769, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SfxFwdVolume: 1
+  SfxRevVolume: 1
+  fadeTime: 1
   redLoopFwd: {fileID: 8300000, guid: c80c8bd81b25a5f45b3cab9a91a875c2, type: 3}
   greenLoopFwd: {fileID: 8300000, guid: 8b0d60f6a25539b4db33eb1b2362802f, type: 3}
   blueLoopFwd: {fileID: 8300000, guid: a1879324565ab6c4e85737033ac56187, type: 3}
   redLoopRev: {fileID: 8300000, guid: b084951edcfc4284ba8dbb8349066e4b, type: 3}
   greenLoopRev: {fileID: 8300000, guid: 5e1995c49be09c04abd5d56a44f759e9, type: 3}
   blueLoopRev: {fileID: 8300000, guid: 77a7d1b476937ba4e8299a486a8d11a0, type: 3}
-  fadeTime: 1
+--- !u!114 &1575953986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1575953980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca42f81ff9ceb0143b5f30262e5ee8e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
