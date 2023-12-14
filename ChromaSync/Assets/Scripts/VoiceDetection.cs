@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Windows.Speech;
+using UnityEngine.Localization.Settings;
 
 public class VoiceDetection : MonoBehaviour
 {
@@ -25,6 +26,24 @@ public class VoiceDetection : MonoBehaviour
     // Reference to the SoundManager script
     private SoundManager soundManager;
 
+    // Localization logic
+    private string moreKey, lessKey, stopKey, redKey, greenKey, blueKey, moreRedKey, moreGreenKey, moreBlueKey, lessRedKey, lessGreenKey, lessBlueKey;
+
+    private void Awake()
+    {
+        moreKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "more");
+        lessKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "less");
+        stopKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "stop");
+        redKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "red");
+        greenKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "green");
+        blueKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "blue");
+        moreRedKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "morered");
+        moreGreenKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "moregreen");
+        moreBlueKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "moreblue");
+        lessRedKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "lessred");
+        lessGreenKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "lessgreen");
+        lessBlueKey = LocalizationSettings.StringDatabase.GetLocalizedString("VoiceCommandLocalization", "lessblue");
+    }
     private void Start()
     {
         originalMaterial = new Material(Shader.Find("Standard"));
@@ -32,7 +51,7 @@ public class VoiceDetection : MonoBehaviour
 
         gObj.GetComponent<Renderer>().material = originalMaterial;
 
-        keywordRecognizer = new KeywordRecognizer(new string[] { "morered", "lessred", "moregreen", "lessgreen", "moreblue", "lessblue", "more", "less", "red", "green", "blue", "stop", "top", "opp" });
+        keywordRecognizer = new KeywordRecognizer(new string[] { moreKey, lessKey, stopKey, redKey, greenKey, blueKey, moreRedKey, moreGreenKey, moreBlueKey, lessRedKey, lessGreenKey, lessBlueKey });
         keywordRecognizer.OnPhraseRecognized += RecognizedSpeech;
 
         // Get the SoundManager script attached to this GameObject
@@ -57,31 +76,31 @@ public class VoiceDetection : MonoBehaviour
 
         string currentWord = speech.text;
 
-        if (currentWord == "stop" || currentWord == "top" || currentWord == "opp")
+        if (currentWord == stopKey)
         {
             StopColorAnimation();
         }
-        else if (currentWord == "more" || currentWord == "less")
+        else if (currentWord == moreKey || currentWord == lessKey)
         {
             lastCommand = currentWord;
             currentAxis = ' '; // Reset currentAxis to allow color to be selected in the next command
         }
-        else if (currentWord.StartsWith("more") || currentWord.StartsWith("less"))
+        else if (currentWord.StartsWith(moreKey) || currentWord.StartsWith(lessKey))
         {
             // Handle single keywords "morered," "lessred," etc.
-            if (lastCommand != null && lastCommand != "stop" && lastCommand != "top" && lastCommand != "opp")
+            if (lastCommand != null && lastCommand != stopKey)
             {
-                Debug.Log($"Invalid command. Expected: stop, top, opp.");
+                Debug.Log($"Invalid command. Expected: stop.");
             }
             else
             {
                 HandleColorCommand(currentWord);
             }
         }
-        else if (lastCommand == "more" || lastCommand == "less")
+        else if (lastCommand == moreKey || lastCommand == lessKey)
         {
             // Only allow "red", "green", or "blue" after "more" or "less"
-            if (currentWord == "red" || currentWord == "green" || currentWord == "blue")
+            if (currentWord == redKey || currentWord == greenKey || currentWord == blueKey)
             {
                 lastCommand += currentWord; // Combine "more" or "less" with the color
                 currentAxis = currentWord[0];
@@ -112,7 +131,7 @@ public class VoiceDetection : MonoBehaviour
         }
 
         // Require saying "stop" after "more" or "less" followed by the color
-        lastCommand = "stop";
+        lastCommand = stopKey;
 
         // Continue listening after the animation stops
         StartListening();
@@ -123,9 +142,9 @@ public class VoiceDetection : MonoBehaviour
 
     private IEnumerator ContinuousColorAnimation()
     {
-        float increment = (lastCommand.StartsWith("more")) ? 1.0f : -1.0f;
+        float increment = (lastCommand.StartsWith(moreKey)) ? 1.0f : -1.0f;
 
-        while (lastCommand.StartsWith("more") || lastCommand.StartsWith("less"))
+        while (lastCommand.StartsWith(moreKey) || lastCommand.StartsWith(lessKey))
         {
             float incrementValue = increment / 255f;
 
@@ -178,7 +197,7 @@ public class VoiceDetection : MonoBehaviour
     private void PlaySound()
     {
         // Play the corresponding sound based on color and direction
-        if (lastCommand.StartsWith("more"))
+        if (lastCommand.StartsWith(moreKey))
         {
             switch (currentAxis)
             {
@@ -193,7 +212,7 @@ public class VoiceDetection : MonoBehaviour
                     break;
             }
         }
-        else if (lastCommand.StartsWith("less"))
+        else if (lastCommand.StartsWith(lessKey))
         {
             switch (currentAxis)
             {
