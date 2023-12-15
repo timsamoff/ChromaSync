@@ -8,9 +8,15 @@ public class VoiceDetection : MonoBehaviour
 {
     [Header("Game Settings")]
     [SerializeField] private float animationSpeed = 1.0f;
-    [SerializeField] private GameObject gObj;
+    // [SerializeField] private GameObject prefabPrefab; // Serialized field for the prefab
+
+    [SerializeField] private Color startingColor = Color.gray;
+
+    [SerializeField] private RandomPrefabSelector prefabSelector; // Reference to the script attached to the empty GameObject
+
+    private GameObject prefabInstance; // Reference to the instantiated prefab
     private Material originalMaterial;
-    private Color currentColor = Color.black;
+    private Color currentColor = Color.gray;
 
     [Header("Color Channels (0-255)")]
     [SerializeField] private int red = 0;
@@ -24,8 +30,8 @@ public class VoiceDetection : MonoBehaviour
 
     private Coroutine colorAnimationCoroutine;
 
-    // Reference to the SoundManager script
-    private SoundManager soundManager;
+    // Reference to the ColorSoundManager script
+    private ColorSoundManager colorSoundManager;
 
     // Localization logic
     private string moreKey, lessKey, stopKey, redKey, greenKey, blueKey, moreRedKey, moreGreenKey, moreBlueKey, lessRedKey, lessGreenKey, lessBlueKey;
@@ -63,16 +69,22 @@ public class VoiceDetection : MonoBehaviour
 
     private void Start()
     {
-        originalMaterial = new Material(Shader.Find("Standard"));
-        originalMaterial.color = Color.black;
+        // Get the reference to the instantiated prefab
+        prefabInstance = prefabSelector.GetInstantiatedPrefab();
 
-        gObj.GetComponent<Renderer>().material = originalMaterial;
+        originalMaterial = new Material(Shader.Find("Standard"));
+        originalMaterial.color = startingColor;
+
+        // Use the material of the prefab instance
+        prefabInstance.GetComponent<Renderer>().material = originalMaterial;
+
+        currentColor = startingColor;  // Set the currentColor to the starting color
 
         keywordRecognizer = new KeywordRecognizer(new string[] { moreKey, lessKey, stopKey, redKey, greenKey, blueKey, moreRedKey, moreGreenKey, moreBlueKey, lessRedKey, lessGreenKey, lessBlueKey });
         keywordRecognizer.OnPhraseRecognized += RecognizedSpeech;
 
-        // Get the SoundManager script attached to this GameObject
-        soundManager = GetComponent<SoundManager>();
+        // Get the ColorSoundManager script attached to this GameObject
+        colorSoundManager = GetComponent<ColorSoundManager>();
 
         StartListening();
     }
@@ -154,7 +166,7 @@ public class VoiceDetection : MonoBehaviour
         StartListening();
 
         // Stop all sounds using the new method
-        soundManager.StopAllSounds();
+        colorSoundManager.StopAllSounds();
     }
 
     private IEnumerator ContinuousColorAnimation()
@@ -185,7 +197,7 @@ public class VoiceDetection : MonoBehaviour
 
             currentColor = new Color(red / 255f, green / 255f, blue / 255f);
 
-            gObj.GetComponent<Renderer>().material.color = currentColor;
+            prefabInstance.GetComponent<Renderer>().material.color = currentColor;
 
             Debug.Log($"Increment Values: R = {red}, G = {green}, B = {blue}");
 
@@ -207,6 +219,11 @@ public class VoiceDetection : MonoBehaviour
         // Play the sound before starting the animation
         PlaySound();
 
+        // Initialize color values based on currentColor
+        red = Mathf.RoundToInt(currentColor.r * 255f);
+        green = Mathf.RoundToInt(currentColor.g * 255f);
+        blue = Mathf.RoundToInt(currentColor.b * 255f);
+
         // Start a new coroutine for continuous color animation
         colorAnimationCoroutine = StartCoroutine(ContinuousColorAnimation());
     }
@@ -219,13 +236,13 @@ public class VoiceDetection : MonoBehaviour
             switch (currentAxis)
             {
                 case 'r':
-                    soundManager.PlayRedLoopFwd();
+                    colorSoundManager.PlayRedLoopFwd();
                     break;
                 case 'g':
-                    soundManager.PlayGreenLoopFwd();
+                    colorSoundManager.PlayGreenLoopFwd();
                     break;
                 case 'b':
-                    soundManager.PlayBlueLoopFwd();
+                    colorSoundManager.PlayBlueLoopFwd();
                     break;
             }
         }
@@ -234,13 +251,13 @@ public class VoiceDetection : MonoBehaviour
             switch (currentAxis)
             {
                 case 'r':
-                    soundManager.PlayRedLoopRev();
+                    colorSoundManager.PlayRedLoopRev();
                     break;
                 case 'g':
-                    soundManager.PlayGreenLoopRev();
+                    colorSoundManager.PlayGreenLoopRev();
                     break;
                 case 'b':
-                    soundManager.PlayBlueLoopRev();
+                    colorSoundManager.PlayBlueLoopRev();
                     break;
             }
         }

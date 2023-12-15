@@ -17,11 +17,6 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: d20ae0c8abde73f46b5ac8aad33f5e92
   m_SerializeEntries:
-  - m_GUID: 33830527df85e2b4ab4325b97eb735b1
-    m_Address: Assets/Resources/StringLocalizationTable Shared Data.asset
-    m_ReadOnly: 1
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 806269a5f2aac7e449f2399f46c1a5ad
     m_Address: Assets/Resources/Localization/VoiceCommandLocalization Shared Data.asset
     m_ReadOnly: 1

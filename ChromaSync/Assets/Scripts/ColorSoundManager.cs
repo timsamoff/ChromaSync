@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class SoundManager : MonoBehaviour
+public class ColorSoundManager : MonoBehaviour
 {
     [Header("Sfx Settings")]
     [SerializeField, Range(0f, 1f)] private float SfxFwdVolume = 1.0f; // Adjust this variable for Fwd sound volume
