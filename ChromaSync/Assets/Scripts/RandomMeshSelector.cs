@@ -1,30 +1,36 @@
 using UnityEngine;
 
-public class RandomMeshSelector : MonoBehaviour
+public class RandomPrefabSelector : MonoBehaviour
 {
-    public Mesh[] meshOptions;
+    [SerializeField]
+    private GameObject[] prefabOptions; // Assign prefabs directly in the inspector
 
-    void Start()
+    private GameObject instantiatedPrefab; // Reference to the instantiated prefab
+    private bool hasInstantiated = false; // Flag to track if instantiation has occurred
+
+    public void Start()
     {
-        if (meshOptions.Length > 0)
+        if (!hasInstantiated && prefabOptions != null && prefabOptions.Length > 0)
         {
             // Get a random index
-            int randomIndex = Random.Range(0, meshOptions.Length);
+            int randomIndex = Random.Range(0, prefabOptions.Length);
 
-            // Set the selected mesh
-            MeshFilter meshFilter = GetComponent<MeshFilter>();
-            if (meshFilter != null)
-            {
-                meshFilter.mesh = meshOptions[randomIndex];
-            }
-            else
-            {
-                Debug.LogError("MeshFilter component not found on the object.");
-            }
+            // Instantiate the selected prefab
+            instantiatedPrefab = Instantiate(prefabOptions[randomIndex], transform.position, Quaternion.identity);
+
+            // Optionally, you can parent the instantiated prefab to the current GameObject
+            instantiatedPrefab.transform.SetParent(transform);
+
+            hasInstantiated = true; // Set the flag to true
         }
         else
         {
-            Debug.LogError("No mesh options assigned to the array.");
+            Debug.LogWarning("Prefab already instantiated or no prefab options assigned.");
         }
+    }
+
+    public GameObject GetInstantiatedPrefab()
+    {
+        return instantiatedPrefab;
     }
 }
