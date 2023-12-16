@@ -231,7 +231,7 @@ AudioSource:
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
-  Mute: 0
+  Mute: 1
   Spatialize: 0
   SpatializePostEffects: 0
   Priority: 128
@@ -711,9 +711,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44f8fc90e78501746b9767dcdc1ab769, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SfxFwdVolume: 1
-  SfxRevVolume: 1
-  fadeTime: 1
+  SfxFwdVolume: 0.75
+  SfxRevVolume: 0.75
+  fadeTime: 2
+  logarithmicRolloff: 5
+  decibelAdjustment: 10
   redLoopFwd: {fileID: 8300000, guid: c80c8bd81b25a5f45b3cab9a91a875c2, type: 3}
   greenLoopFwd: {fileID: 8300000, guid: 8b0d60f6a25539b4db33eb1b2362802f, type: 3}
   blueLoopFwd: {fileID: 8300000, guid: a1879324565ab6c4e85737033ac56187, type: 3}
