@@ -189,6 +189,10 @@ public class VoiceDetection : MonoBehaviour
         {
             float incrementValue = increment / 255f;
 
+            int previousRed = red;
+            int previousGreen = green;
+            int previousBlue = blue;
+
             switch (currentAxis)
             {
                 case 'r':
@@ -215,7 +219,9 @@ public class VoiceDetection : MonoBehaviour
             if ((red == 0 || red == 255 || green == 0 || green == 255 || blue == 0 || blue == 255) && !stopByColorConditions)
             {
                 colorSoundManager.StopAllSounds();
-                stopByColorConditions = true; // Indicate that "stop" was initiated by color conditions
+                stopByColorConditions = false; // Set to false to continue listening after the animation
+                lastCommand = stopKey;
+                yield break; // Exit the coroutine early
             }
 
             // Check if the "stop" command is detected during the animation
@@ -225,16 +231,17 @@ public class VoiceDetection : MonoBehaviour
                 yield break; // Exit the coroutine early
             }
 
-            Debug.Log($"Increment Values: R = {red}, G = {green}, B = {blue}");
-
-            yield return new WaitForSeconds(animationSpeed / 255f);
+            // Only yield if the color has changed
+            if (previousRed != red || previousGreen != green || previousBlue != blue)
+            {
+                Debug.Log($"Increment Values: R = {red}, G = {green}, B = {blue}");
+                yield return new WaitForSeconds(animationSpeed / 255f);
+            }
         }
 
         // Stop listening after the animation stops
         StopListening();
     }
-
-
 
 
 
