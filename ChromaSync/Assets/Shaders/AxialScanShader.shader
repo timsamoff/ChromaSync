@@ -12,6 +12,9 @@ Shader "Custom/StandardWithAxialScanTranslucent"
         _ScanComplete ("Scan Complete", Range (0, 1)) = 0
         _FadeOutSpeed ("Fade Out Speed", Range (0, 10)) = 2.0
         _Translucency ("Translucency", Range (0, 1)) = 0.25
+
+        // New property for camera Y-axis direction
+        _CameraYDirection("Camera Y Direction", Vector) = (0, 1, 0, 0)
     }
 
     SubShader
@@ -33,6 +36,7 @@ Shader "Custom/StandardWithAxialScanTranslucent"
         float _ScanComplete;
         float _FadeOutSpeed;
         float _Translucency;
+        fixed3 _CameraYDirection;
 
         struct Input
         {
@@ -59,8 +63,11 @@ Shader "Custom/StandardWithAxialScanTranslucent"
                 // Calculate the normalized height based on the object's pivot point
                 float normalizedHeight = (localPos.y + 0.5) / 1.0; // Assuming object's height is 1.0
 
-                // Calculate the modified scan offset based on the object's size
-                float modifiedScanOffset = _ScanOffset * 2.0;
+                // Use the camera's Y-axis direction for animation
+                float cameraYDirection = dot(normalize(_WorldSpaceCameraPos.xyz - IN.worldPos), _CameraYDirection.xyz);
+
+                // Calculate the modified scan offset based on the object's size and camera Y-axis direction
+                float modifiedScanOffset = _ScanOffset * 2.0 * cameraYDirection;
 
                 // Determine if the scan is visible based on the modified offset and normalized height
                 float scanEffect = 1.0 - step(modifiedScanOffset, normalizedHeight);
