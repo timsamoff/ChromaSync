@@ -4,9 +4,11 @@ using UnityEngine;
 public class ColorSoundManager : MonoBehaviour
 {
     [Header("Sfx Settings")]
-    [SerializeField, Range(0f, 1f)] private float SfxFwdVolume = 1.0f; // Adjust this variable for Fwd sound volume
-    [SerializeField, Range(0f, 1f)] private float SfxRevVolume = 1.0f; // Adjust this variable for Rev sound volume
-    [SerializeField] private float fadeTime = 1.0f; // Adjust this variable for fade in/out time
+    [SerializeField, Range(0f, 1f)] private float SfxFwdVolume = 1.0f;
+    [SerializeField, Range(0f, 1f)] private float SfxRevVolume = 1.0f;
+    [SerializeField] private float fadeTime = 1.0f;
+    [SerializeField, Range(0.1f, 5f)] private float logarithmicRolloff = 2.0f;
+    [SerializeField, Range(0.1f, 10f)] private float decibelAdjustment = 20f;
 
     [Header("Sound Clips")]
     [SerializeField] private AudioClip redLoopFwd;
@@ -25,7 +27,6 @@ public class ColorSoundManager : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         audioSource.playOnAwake = false;
 
-        // Create a child GameObject for the crossfade source
         GameObject crossfadeObject = new GameObject("CrossfadeAudioSource");
         crossfadeObject.transform.parent = transform;
         crossfadeSource = crossfadeObject.AddComponent<AudioSource>();
@@ -85,15 +86,27 @@ public class ColorSoundManager : MonoBehaviour
 
         while (elapsedTime < fadeTime)
         {
-            audioSource.volume = Mathf.Lerp(startVolume, 0f, EaseInOutQuad(elapsedTime / fadeTime));
+            float t = elapsedTime / fadeTime;
+            float linearVolume = Mathf.Lerp(startVolume, 0f, Mathf.Pow(t, logarithmicRolloff));
+            float adjustedVolume = DecibelToLinear(LinearToDecibel(linearVolume) - decibelAdjustment);
+
+            audioSource.volume = adjustedVolume;
             elapsedTime += Time.deltaTime;
+
+            // Ensure the volume reaches zero before stopping
+            if (adjustedVolume <= 0.001f)
+            {
+                break;
+            }
+
             yield return null;
         }
 
         audioSource.volume = 0f;
         audioSource.Stop();
-        audioSource.loop = false; // Disable looping when stopping
+        audioSource.loop = false;
     }
+
 
     private IEnumerator FadeOutAndIn(AudioClip newClip, float targetVolume)
     {
@@ -105,32 +118,33 @@ public class ColorSoundManager : MonoBehaviour
 
         while (elapsedTime < fadeTime)
         {
-            // Fade out the main audio source
-            audioSource.volume = Mathf.Lerp(1f, 0f, EaseInOutQuad(elapsedTime / fadeTime));
+            float t = elapsedTime / fadeTime;
+            float linearFadeOut = Mathf.Lerp(1f, 0f, Mathf.Pow(t, logarithmicRolloff));
+            float adjustedFadeOut = DecibelToLinear(LinearToDecibel(linearFadeOut) - decibelAdjustment);
 
-            // Fade in the crossfade source
-            crossfadeSource.volume = Mathf.Lerp(0f, targetVolume, EaseInOutQuad(elapsedTime / fadeTime));
+            audioSource.volume = adjustedFadeOut;
+            crossfadeSource.volume = Mathf.Lerp(0f, targetVolume, Mathf.Pow(t, logarithmicRolloff));
 
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
-        // Stop the main audio source
         audioSource.Stop();
         audioSource.volume = targetVolume;
-
-        // Set the new sound to the main audio source
         audioSource.clip = newClip;
         audioSource.loop = true;
         audioSource.Play();
 
-        // Stop the crossfade source
         crossfadeSource.Stop();
     }
 
-    private float EaseInOutQuad(float t)
+    private float LinearToDecibel(float linear)
     {
-        // Easing function: quadratic ease-in-out
-        return t < 0.5f ? 2f * t * t : -1f + (4f - 2f * t) * t;
+        return 20f * Mathf.Log10(linear);
+    }
+
+    private float DecibelToLinear(float decibel)
+    {
+        return Mathf.Pow(10f, decibel / 20f);
     }
 }
