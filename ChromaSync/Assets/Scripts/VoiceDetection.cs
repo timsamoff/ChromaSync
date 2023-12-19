@@ -32,6 +32,8 @@ public class VoiceDetection : MonoBehaviour
 
     // Reference to the ColorSoundManager script
     private ColorSoundManager colorSoundManager;
+    private bool stopByColorConditions = false;
+
 
     // Localization logic
     private string moreKey, lessKey, stopKey, redKey, greenKey, blueKey, moreRedKey, moreGreenKey, moreBlueKey, lessRedKey, lessGreenKey, lessBlueKey;
@@ -113,6 +115,9 @@ public class VoiceDetection : MonoBehaviour
         {
             lastCommand = currentWord;
             currentAxis = ' '; // Reset currentAxis to allow color to be selected in the next command
+
+            // Reset the flag to allow audio playback
+            stopByColorConditions = false;
         }
         else if (currentWord.StartsWith(moreKey) || currentWord.StartsWith(lessKey))
         {
@@ -142,6 +147,7 @@ public class VoiceDetection : MonoBehaviour
         }
     }
 
+
     private void HandleColorCommand(string color)
     {
         lastCommand = color;
@@ -159,10 +165,13 @@ public class VoiceDetection : MonoBehaviour
             StopCoroutine(colorAnimationCoroutine);
         }
 
+        // Indicate that "stop" was initiated by color conditions
+        stopByColorConditions = true;
+
         // Require saying "stop" after "more" or "less" followed by the color
         lastCommand = stopKey;
 
-        // Continue listening after the animation stops
+        // Continue listening after the animation
         StartListening();
 
         // Stop all sounds using the new method
@@ -173,9 +182,16 @@ public class VoiceDetection : MonoBehaviour
     {
         float increment = (lastCommand.StartsWith(moreKey)) ? 1.0f : -1.0f;
 
+        // Reset the flag at the beginning of the animation
+        stopByColorConditions = false;
+
         while (lastCommand.StartsWith(moreKey) || lastCommand.StartsWith(lessKey))
         {
             float incrementValue = increment / 255f;
+
+            int previousRed = red;
+            int previousGreen = green;
+            int previousBlue = blue;
 
             switch (currentAxis)
             {
@@ -199,14 +215,35 @@ public class VoiceDetection : MonoBehaviour
 
             prefabInstance.GetComponent<Renderer>().material.color = currentColor;
 
-            Debug.Log($"Increment Values: R = {red}, G = {green}, B = {blue}");
+            // Check if any color channel reaches 0 or 255 and stop the sound
+            if ((red == 0 || red == 255 || green == 0 || green == 255 || blue == 0 || blue == 255) && !stopByColorConditions)
+            {
+                colorSoundManager.StopAllSounds();
+                stopByColorConditions = false; // Set to false to continue listening after the animation
+                lastCommand = stopKey;
+                yield break; // Exit the coroutine early
+            }
 
-            yield return new WaitForSeconds(animationSpeed / 255f);
+            // Check if the "stop" command is detected during the animation
+            if (lastCommand == stopKey)
+            {
+                StopColorAnimation();
+                yield break; // Exit the coroutine early
+            }
+
+            // Only yield if the color has changed
+            if (previousRed != red || previousGreen != green || previousBlue != blue)
+            {
+                Debug.Log($"Increment Values: R = {red}, G = {green}, B = {blue}");
+                yield return new WaitForSeconds(animationSpeed / 255f);
+            }
         }
 
         // Stop listening after the animation stops
         StopListening();
     }
+
+
 
     private void StartColorAnimation()
     {
@@ -231,34 +268,37 @@ public class VoiceDetection : MonoBehaviour
     private void PlaySound()
     {
         // Play the corresponding sound based on color and direction
-        if (lastCommand.StartsWith(moreKey))
+        if (!stopByColorConditions) // Only play sound if not stopped by color conditions
         {
-            switch (currentAxis)
+            if (lastCommand.StartsWith(moreKey))
             {
-                case 'r':
-                    colorSoundManager.PlayRedLoopFwd();
-                    break;
-                case 'g':
-                    colorSoundManager.PlayGreenLoopFwd();
-                    break;
-                case 'b':
-                    colorSoundManager.PlayBlueLoopFwd();
-                    break;
+                switch (currentAxis)
+                {
+                    case 'r':
+                        colorSoundManager.PlayRedLoopFwd();
+                        break;
+                    case 'g':
+                        colorSoundManager.PlayGreenLoopFwd();
+                        break;
+                    case 'b':
+                        colorSoundManager.PlayBlueLoopFwd();
+                        break;
+                }
             }
-        }
-        else if (lastCommand.StartsWith(lessKey))
-        {
-            switch (currentAxis)
+            else if (lastCommand.StartsWith(lessKey))
             {
-                case 'r':
-                    colorSoundManager.PlayRedLoopRev();
-                    break;
-                case 'g':
-                    colorSoundManager.PlayGreenLoopRev();
-                    break;
-                case 'b':
-                    colorSoundManager.PlayBlueLoopRev();
-                    break;
+                switch (currentAxis)
+                {
+                    case 'r':
+                        colorSoundManager.PlayRedLoopRev();
+                        break;
+                    case 'g':
+                        colorSoundManager.PlayGreenLoopRev();
+                        break;
+                    case 'b':
+                        colorSoundManager.PlayBlueLoopRev();
+                        break;
+                }
             }
         }
     }
