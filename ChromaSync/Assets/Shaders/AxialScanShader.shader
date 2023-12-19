@@ -1,4 +1,4 @@
-Shader "Custom/StandardWithAxialScan"
+Shader "Custom/StandardWithAxialScanTranslucent"
 {
     Properties
     {
@@ -11,6 +11,7 @@ Shader "Custom/StandardWithAxialScan"
         _ScanOffset ("Scan Offset", Range (0, 1)) = 0
         _ScanComplete ("Scan Complete", Range (0, 1)) = 0
         _FadeOutSpeed ("Fade Out Speed", Range (0, 10)) = 2.0
+        _Translucency ("Translucency", Range (0, 1)) = 0.25
     }
 
     SubShader
@@ -19,7 +20,7 @@ Shader "Custom/StandardWithAxialScan"
         LOD 100
 
         CGPROGRAM
-        #pragma surface surf Standard fullforwardshadows
+        #pragma surface surf Standard fullforwardshadows alpha:blend
 
         // Include standard lighting function
         #include "UnityPBSLighting.cginc"
@@ -31,6 +32,7 @@ Shader "Custom/StandardWithAxialScan"
         float _ScanOffset;
         float _ScanComplete;
         float _FadeOutSpeed;
+        float _Translucency;
 
         struct Input
         {
@@ -61,20 +63,23 @@ Shader "Custom/StandardWithAxialScan"
                 float modifiedScanOffset = _ScanOffset * 2.0;
 
                 // Determine if the scan is visible based on the modified offset and normalized height
-                float scanEffect = step(modifiedScanOffset, normalizedHeight);
+                float scanEffect = 1.0 - step(modifiedScanOffset, normalizedHeight);
 
-                // Blend the existing color with white based on the scan effect
-                o.Albedo = lerp(o.Albedo, float3(1, 1, 1), scanEffect);
+                // Discard transparent regions
+                if (scanEffect == 0.0)
+                    discard;
+
+                // Only apply the scan effect where it's needed
+                o.Albedo = float3(1, 1, 1);
+                o.Alpha = _Translucency; // Set the alpha to the specified translucency value
             }
             else
             {
                 // Gradually reduce the intensity of the scan effect when complete
                 float fadeIntensity = 1.0 - saturate((_ScanComplete - 1.0) / _FadeOutSpeed);
                 o.Albedo = lerp(o.Albedo, _Color.rgb, fadeIntensity);
+                o.Alpha = 1.0;
             }
-
-            // The alpha remains unchanged
-            o.Alpha = 1.0;
 
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
