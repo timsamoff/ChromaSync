@@ -38,7 +38,11 @@ public class SmartObjectRotator : MonoBehaviour
     [SerializeField]
     private Vector2 zRange = new Vector2(-1.0f, 1.0f);
 
+<<<<<<< HEAD
     [Header("Rotation Values")]
+=======
+    [Header("Rotation Values (Offset defaults for starting rotation)")]
+>>>>>>> 18dc7545238d97c328e3be7bfb9ad0035805e2be
     [SerializeField, Range(-1.0f, 1.0f)]
     private float xRotation = 0.0f;
 
