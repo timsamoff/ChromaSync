@@ -74,8 +74,21 @@ public class VoiceDetection : MonoBehaviour
         // Get the reference to the instantiated prefab
         prefabInstance = prefabSelector.GetInstantiatedPrefab();
 
-        originalMaterial = new Material(Shader.Find("Standard"));
+        // originalMaterial = new Material(Shader.Find("Standard"));
+        originalMaterial = Instantiate(prefabInstance.GetComponent<Renderer>().material);
+        // originalMaterial = new Material(Shader.Find("Transparent/Diffuse"));
+        // originalMaterial = new Material(Shader.Find("Standard (Specular setup)"));
         originalMaterial.color = startingColor;
+
+        // Set rendering mode to Transparent
+        originalMaterial.SetFloat("_Mode", 3); // 3 corresponds to "Transparent" rendering mode
+        originalMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        originalMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        originalMaterial.SetInt("_ZWrite", 0);
+        originalMaterial.DisableKeyword("_ALPHATEST_ON");
+        originalMaterial.EnableKeyword("_ALPHABLEND_ON");
+        originalMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        originalMaterial.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
 
         // Use the material of the prefab instance
         prefabInstance.GetComponent<Renderer>().material = originalMaterial;
@@ -90,6 +103,7 @@ public class VoiceDetection : MonoBehaviour
 
         StartListening();
     }
+
 
     private void StartListening()
     {
@@ -210,6 +224,10 @@ public class VoiceDetection : MonoBehaviour
                 case ' ':
                     break;
             }
+
+            // Only update the Albedo color of the material
+            Color newAlbedoColor = new Color(red / 255f, green / 255f, blue / 255f, originalMaterial.color.a);
+            prefabInstance.GetComponent<Renderer>().material.SetColor("_Color", newAlbedoColor);
 
             currentColor = new Color(red / 255f, green / 255f, blue / 255f);
 

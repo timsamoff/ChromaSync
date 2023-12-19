@@ -419,7 +419,6 @@ GameObject:
   - component: {fileID: 1417352530}
   - component: {fileID: 1417352534}
   - component: {fileID: 1417352535}
-  - component: {fileID: 1417352536}
   m_Layer: 0
   m_Name: Object
   m_TagString: Untagged
@@ -520,7 +519,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 654db181d5045cc489c257be92d88aeb, type: 2}
+  - {fileID: 2100000, guid: 37393d865756989458d9d288b1a99129, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -542,20 +541,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &1417352536
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1417352525}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 270d2b9326a8da3499020a811df80849, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scanTime: 5
-  scanAxis: {x: 0, y: 1, z: 0}
 --- !u!1 &1575953980
 GameObject:
   m_ObjectHideFlags: 0
@@ -585,7 +570,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1575953980}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 58f2a08683f22b14d9197bb4853a5e40, type: 3}
   m_Name: 
@@ -766,7 +751,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ba5eac07fa755e4381e122ff2b32264, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabPrefab: {fileID: 0}
+  prefabPrefab: {fileID: 1417352525}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
