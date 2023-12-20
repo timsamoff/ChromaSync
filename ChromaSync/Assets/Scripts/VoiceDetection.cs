@@ -16,7 +16,7 @@ public class VoiceDetection : MonoBehaviour
 
     private GameObject prefabInstance; // Reference to the instantiated prefab
     private Material originalMaterial;
-    private Color currentColor = Color.gray;
+    private Color currentColor = Color.white;
 
     [Header("Color Channels (0-255)")]
     [SerializeField] private int red = 0;
@@ -90,7 +90,8 @@ public class VoiceDetection : MonoBehaviour
         originalMaterial.color = startingColor;
 
         // Output material color with alpha to the console
-        Debug.Log($"Material Color with Alpha: {originalMaterial.color}");
+        Debug.Log($"Material Color with Alpha: R={Mathf.RoundToInt(originalMaterial.color.r * 255)}, G={Mathf.RoundToInt(originalMaterial.color.g * 255)}, B={Mathf.RoundToInt(originalMaterial.color.b * 255)}, A={originalMaterial.color.a}");
+
 
         prefabInstance.GetComponent<Renderer>().material = originalMaterial;
 
@@ -160,7 +161,6 @@ public class VoiceDetection : MonoBehaviour
         }
     }
 
-
     private void HandleColorCommand(string color)
     {
         lastCommand = color;
@@ -226,7 +226,8 @@ public class VoiceDetection : MonoBehaviour
 
             // Only update the Albedo color of the material
             Color newAlbedoColor = new Color(red / 255f, green / 255f, blue / 255f, originalMaterial.color.a);
-            Debug.Log($"Setting color to: {newAlbedoColor}");
+            // Debug.Log($"Setting color to: R={Mathf.RoundToInt(newAlbedoColor.r * 255)}, G={Mathf.RoundToInt(newAlbedoColor.g * 255)}, B={Mathf.RoundToInt(newAlbedoColor.b * 255)}, A={newAlbedoColor.a}");
+
             prefabInstance.GetComponent<Renderer>().material.color = newAlbedoColor;
 
             currentColor = new Color(red / 255f, green / 255f, blue / 255f);
@@ -252,7 +253,7 @@ public class VoiceDetection : MonoBehaviour
             // Only yield if the color has changed
             if (previousRed != red || previousGreen != green || previousBlue != blue)
             {
-                Debug.Log($"Increment Values: R = {red}, G = {green}, B = {blue}");
+                // Debug.Log($"Increment Values: R = {red}, G = {green}, B = {blue}");
                 yield return new WaitForSeconds(animationSpeed / 255f);
             }
         }

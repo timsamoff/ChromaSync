@@ -1,85 +1,186 @@
 /* using System.Collections;
+using System.Globalization;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
+using UnityEngine.Windows.Speech;
 
 public class ColorHandler : MonoBehaviour
 {
-    [SerializeField] private Color startingColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+    [Header("Game Settings")]
+    [SerializeField] private float animationSpeed = 1.0f;
 
-    public void SetColor(GameObject prefabInstance, Material originalMaterial, ref Color currentColor)
+    private GameObject prefabInstance;
+    private Material originalMaterial;
+    private Color currentColor = Color.gray;
+
+    [Header("Color Channels (0-255)")]
+    [SerializeField] private int red = 0;
+    [SerializeField] private int green = 0;
+    [SerializeField] private int blue = 0;
+
+    private Coroutine colorAnimationCoroutine;
+    private ColorSoundManager colorSoundManager;
+    private bool stopByColorConditions = false;
+    private KeywordRecognizer keywordRecognizer;
+    private bool isListening = false;
+    private string lastCommand = null;
+    private char currentAxis = 'r';
+
+    private void Start()
     {
+        prefabInstance = GetComponent<RandomPrefabSelector>().GetInstantiatedPrefab();
+        originalMaterial = prefabInstance.GetComponent<Renderer>().material;
+
+        originalMaterial.SetFloat("_Mode", 3);
+        originalMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        originalMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        originalMaterial.SetInt("_ZWrite", 0);
+        originalMaterial.DisableKeyword("_ALPHATEST_ON");
+        originalMaterial.EnableKeyword("_ALPHABLEND_ON");
+        originalMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        originalMaterial.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+
         originalMaterial.color = startingColor;
-        Debug.Log($"Material Color with Alpha: {originalMaterial.color}");
+
         prefabInstance.GetComponent<Renderer>().material = originalMaterial;
+
         currentColor = startingColor;
+
+        colorSoundManager = GetComponent<ColorSoundManager>();
+
+        StartListening();
     }
 
-    public IEnumerator ContinuousColorAnimation(
-        MonoBehaviour monoBehaviour,
-        ref string lastCommand,
-        Material originalMaterial,
-        GameObject prefabInstance,
-        ref Color currentColor,
-        float animationSpeed,
-        ref int red,
-        ref int green,
-        ref int blue,
-        ColorSoundManager colorSoundManager)
+    private void StartListening()
     {
-        float increment = (lastCommand.StartsWith("more")) ? 1.0f : -1.0f;
+        if (!isListening)
+        {
+            keywordRecognizer.Start();
+            isListening = true;
+            Debug.Log("Listening for keywords...");
+        }
+    }
 
-        while (lastCommand.StartsWith("more") || lastCommand.StartsWith("less"))
+    private void StopListening()
+    {
+        if (isListening)
+        {
+            keywordRecognizer.Stop();
+            isListening = false;
+            Debug.Log("Stopped listening...");
+        }
+    }
+
+    private void RecognizedSpeech(PhraseRecognizedEventArgs speech)
+    {
+        Debug.Log($"Word Spoken: {speech.text}");
+
+        string currentWord = speech.text;
+
+        if (currentWord == stopKey)
+        {
+            StopColorAnimation();
+        }
+        else if (currentWord == moreKey || currentWord == lessKey)
+        {
+            lastCommand = currentWord;
+            currentAxis = ' ';
+            stopByColorConditions = false;
+        }
+        else if (currentWord.StartsWith(moreKey) || currentWord.StartsWith(lessKey))
+        {
+            if (lastCommand != null && lastCommand != stopKey)
+            {
+                Debug.Log($"Invalid command. Expected: stop.");
+            }
+            else
+            {
+                HandleColorCommand(currentWord);
+            }
+        }
+        else if (lastCommand == moreKey || lastCommand == lessKey)
+        {
+            if (currentWord == redKey || currentWord == greenKey || currentWord == blueKey)
+            {
+                lastCommand += currentWord;
+                currentAxis = currentWord[0];
+                StartColorAnimation();
+            }
+            else
+            {
+                Debug.Log($"Invalid command after {lastCommand}. Expected: red, green, blue.");
+            }
+        }
+    }
+
+    private void HandleColorCommand(string color)
+    {
+        lastCommand = color;
+        currentAxis = color.Substring(4)[0];
+        StartColorAnimation();
+        PlaySound();
+    }
+
+    private void StopColorAnimation()
+    {
+        if (colorAnimationCoroutine != null)
+        {
+            StopCoroutine(colorAnimationCoroutine);
+        }
+
+        stopByColorConditions = true;
+        lastCommand = stopKey;
+        StartListening();
+        colorSoundManager.StopAllSounds();
+    }
+
+    private IEnumerator ContinuousColorAnimation()
+    {
+        float increment = (lastCommand.StartsWith(moreKey)) ? 1.0f : -1.0f;
+        stopByColorConditions = false;
+
+        while (lastCommand.StartsWith(moreKey) || lastCommand.StartsWith(lessKey))
         {
             float incrementValue = increment / 255f;
             int previousRed = red;
             int previousGreen = green;
             int previousBlue = blue;
 
-            switch (lastCommand)
+            switch (currentAxis)
             {
-                case "morered":
+                case 'r':
                     red += Mathf.RoundToInt(incrementValue * 255f);
                     red = Mathf.Clamp(red, 0, 255);
                     break;
-                case "moregreen":
+                case 'g':
                     green += Mathf.RoundToInt(incrementValue * 255f);
                     green = Mathf.Clamp(green, 0, 255);
                     break;
-                case "moreblue":
+                case 'b':
                     blue += Mathf.RoundToInt(incrementValue * 255f);
                     blue = Mathf.Clamp(blue, 0, 255);
                     break;
-                case "lessred":
-                    red -= Mathf.RoundToInt(incrementValue * 255f);
-                    red = Mathf.Clamp(red, 0, 255);
-                    break;
-                case "lessgreen":
-                    green -= Mathf.RoundToInt(incrementValue * 255f);
-                    green = Mathf.Clamp(green, 0, 255);
-                    break;
-                case "lessblue":
-                    blue -= Mathf.RoundToInt(incrementValue * 255f);
-                    blue = Mathf.Clamp(blue, 0, 255);
+                case ' ':
                     break;
             }
 
             Color newAlbedoColor = new Color(red / 255f, green / 255f, blue / 255f, originalMaterial.color.a);
             Debug.Log($"Setting color to: {newAlbedoColor}");
             prefabInstance.GetComponent<Renderer>().material.color = newAlbedoColor;
-
             currentColor = new Color(red / 255f, green / 255f, blue / 255f);
-
             prefabInstance.GetComponent<Renderer>().material.color = currentColor;
 
-            if ((red == 0 || red == 255 || green == 0 || green == 255 || blue == 0 || blue == 255))
+            if ((red == 0 || red == 255 || green == 0 || green == 255 || blue == 0 || blue == 255) && !stopByColorConditions)
             {
                 colorSoundManager.StopAllSounds();
-                yield return monoBehaviour.StartCoroutine(StopAnimation(colorSoundManager, ref lastCommand));
+                stopByColorConditions = false;
+                lastCommand = stopKey;
                 yield break;
             }
 
-            if (lastCommand == "stop")
+            if (lastCommand == stopKey)
             {
-                yield return monoBehaviour.StartCoroutine(StopAnimation(colorSoundManager, ref lastCommand));
+                StopColorAnimation();
                 yield break;
             }
 
@@ -90,19 +191,62 @@ public class ColorHandler : MonoBehaviour
             }
         }
 
-        StopListening(monoBehaviour);
+        StopListening();
     }
 
-    private IEnumerator StopAnimation(ColorSoundManager colorSoundManager, ref string lastCommand)
+    private void StartColorAnimation()
     {
-        colorSoundManager.StopAllSounds();
-        yield return new WaitForSeconds(0.1f); // Adjust delay if needed
-        lastCommand = "stop";
+        if (colorAnimationCoroutine != null)
+        {
+            StopCoroutine(colorAnimationCoroutine);
+        }
+
+        PlaySound();
+        red = Mathf.RoundToInt(currentColor.r * 255f);
+        green = Mathf.RoundToInt(currentColor.g * 255f);
+        blue = Mathf.RoundToInt(currentColor.b * 255f);
+        colorAnimationCoroutine = StartCoroutine(ContinuousColorAnimation());
     }
 
-    private void StopListening(MonoBehaviour monoBehaviour)
+    private void PlaySound()
     {
-        // Placeholder: Implement logic to stop listening
-        Debug.Log("Stopping listening...");
+        if (!stopByColorConditions)
+        {
+            if (lastCommand.StartsWith(moreKey))
+            {
+                switch (currentAxis)
+                {
+                    case 'r':
+                        colorSoundManager.PlayRedLoopFwd();
+                        break;
+                    case 'g':
+                        colorSoundManager.PlayGreenLoopFwd();
+                        break;
+                    case 'b':
+                        colorSoundManager.PlayBlueLoopFwd();
+                        break;
+                }
+            }
+            else if (lastCommand.StartsWith(lessKey))
+            {
+                switch (currentAxis)
+                {
+                    case 'r':
+                        colorSoundManager.PlayRedLoopRev();
+                        break;
+                    case 'g':
+                        colorSoundManager.PlayGreenLoopRev();
+                        break;
+                    case 'b':
+                        colorSoundManager.PlayBlueLoopRev();
+                        break;
+                }
+            }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
     }
 } */
