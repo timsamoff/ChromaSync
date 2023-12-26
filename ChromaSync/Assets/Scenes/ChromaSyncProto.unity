@@ -416,6 +416,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1417352529}
   - component: {fileID: 1417352531}
+  - component: {fileID: 1417352537}
   - component: {fileID: 1417352536}
   - component: {fileID: 1417352530}
   - component: {fileID: 1417352534}
@@ -557,12 +558,25 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1417352525}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 134606598b0dddb4c9c76ab0c60fc6fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   difficultyLevel: 5
+--- !u!114 &1417352537
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1417352525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84820c77f46b81f46be7044a4b470235, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  difficultyLevel: 10
 --- !u!1 &1575953980
 GameObject:
   m_ObjectHideFlags: 0
