@@ -416,6 +416,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1417352529}
   - component: {fileID: 1417352531}
+  - component: {fileID: 1417352536}
   - component: {fileID: 1417352530}
   - component: {fileID: 1417352534}
   - component: {fileID: 1417352535}
@@ -448,7 +449,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1417352525}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e7b7a0e22b6a8154a94239f9e565f8a5, type: 3}
   m_Name: 
@@ -489,13 +490,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotationSpeed: 25
-  transitionDuration: 1
+  timeBeforeInitialRotation: 0
   destinationDuration: 5
-  transitionType: 0
-  logarithmicRolloff: 1
-  xRange: {x: -1, y: 1}
-  yRange: {x: -1, y: 1}
-  zRange: {x: -1, y: 1}
+  transitionDuration: 1
+  randomizeStartRotation: 1
+  transitionType: 1
+  logarithmicRolloff: 2
+  xRange:
+    low: -1
+    high: 1
+  yRange:
+    low: -1
+    high: 1
+  zRange:
+    low: -1
+    high: 1
   xRotation: 0
   yRotation: 0
   zRotation: 0
@@ -541,6 +550,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1417352536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1417352525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 134606598b0dddb4c9c76ab0c60fc6fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  difficultyLevel: 5
 --- !u!1 &1575953980
 GameObject:
   m_ObjectHideFlags: 0
