@@ -39,7 +39,7 @@ public class ColorAnalyzer : MonoBehaviour
         }
         else
         {
-            Debug.Log("Color out of range.");
+            // Debug.Log("Color out of range.");
         }
 
         // Adjust difficulty based on the color comparison
