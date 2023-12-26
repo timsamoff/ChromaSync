@@ -8,32 +8,25 @@ public class ColorAnalyzer : MonoBehaviour
 
     void Update()
     {
-        // Get the background color and convert to HSV
+        // Get the background color and convert to Lab
         Color backgroundColor = Camera.main.backgroundColor;
-        float[] backgroundHSV = new float[3];
-        Color.RGBToHSV(backgroundColor, out backgroundHSV[0], out backgroundHSV[1], out backgroundHSV[2]);
+        Vector3 backgroundLab = RGBtoLab(backgroundColor);
 
-        // Get the material color and convert to HSV
+        // Get the material color and convert to Lab
         Renderer renderer = GetComponent<Renderer>();
         Material material = renderer.material;
         Color materialColor = material.color;
-        float[] materialHSV = new float[3];
-        Color.RGBToHSV(materialColor, out materialHSV[0], out materialHSV[1], out materialHSV[2]);
+        Vector3 materialLab = RGBtoLab(materialColor);
 
-        // Calculate HSV thresholds based on difficulty level
+        // Calculate Lab threshold based on difficulty level
         float thresholdMultiplier = 1.1f - difficultyLevel * 0.1f; // Convert 1-10 to 1.0-0.1 range
-        float hueThreshold = 0.1f * thresholdMultiplier;
-        float saturationThreshold = 0.1f * thresholdMultiplier;
-        float valueThreshold = 0.1f * thresholdMultiplier;
+        float labThreshold = 10.0f * thresholdMultiplier; // Adjust the threshold based on your preferences
 
-        // Compare HSV values
-        bool colorsInRange =
-            Mathf.Abs(backgroundHSV[0] - materialHSV[0]) < hueThreshold &&
-            Mathf.Abs(backgroundHSV[1] - materialHSV[1]) < saturationThreshold &&
-            Mathf.Abs(backgroundHSV[2] - materialHSV[2]) < valueThreshold;
+        // Compare Lab values
+        bool labsInRange = Vector3.Distance(backgroundLab, materialLab) < labThreshold;
 
         // Debug messages
-        if (colorsInRange)
+        if (labsInRange)
         {
             Debug.Log("Color matching complete!");
         }
@@ -42,8 +35,8 @@ public class ColorAnalyzer : MonoBehaviour
             // Debug.Log("Color out of range.");
         }
 
-        // Adjust difficulty based on the color comparison
-        if (colorsInRange)
+        // Adjust difficulty based on the Lab comparison
+        if (labsInRange)
         {
             // Colors are within the specified range (easier)
             AdjustDifficulty(1.0f);
@@ -60,5 +53,36 @@ public class ColorAnalyzer : MonoBehaviour
         // Add your difficulty adjustment logic here
         // For example, you might adjust the speed or health of the object
         // based on the modifier value.
+    }
+
+    Vector3 RGBtoLab(Color color)
+    {
+        // Convert RGB to XYZ
+        float r = color.r;
+        float g = color.g;
+        float b = color.b;
+
+        r = (r > 0.04045f) ? Mathf.Pow((r + 0.055f) / 1.055f, 2.4f) : r / 12.92f;
+        g = (g > 0.04045f) ? Mathf.Pow((g + 0.055f) / 1.055f, 2.4f) : g / 12.92f;
+        b = (b > 0.04045f) ? Mathf.Pow((b + 0.055f) / 1.055f, 2.4f) : b / 12.92f;
+
+        r *= 100.0f;
+        g *= 100.0f;
+        b *= 100.0f;
+
+        float x = r * 0.4124564f + g * 0.3575761f + b * 0.1804375f;
+        float y = r * 0.2126729f + g * 0.7151522f + b * 0.0721750f;
+        float z = r * 0.0193339f + g * 0.1191920f + b * 0.9503041f;
+
+        // Convert XYZ to Lab
+        x = (x > 0.008856f) ? Mathf.Pow(x, 1.0f / 3.0f) : (903.3f * x + 16.0f) / 116.0f;
+        y = (y > 0.008856f) ? Mathf.Pow(y, 1.0f / 3.0f) : (903.3f * y + 16.0f) / 116.0f;
+        z = (z > 0.008856f) ? Mathf.Pow(z, 1.0f / 3.0f) : (903.3f * z + 16.0f) / 116.0f;
+
+        float l = Mathf.Max(0.0f, 116.0f * y - 16.0f);
+        float aLab = (x - y) * 500.0f;
+        float bLab = (y - z) * 200.0f;
+
+        return new Vector3(l, aLab, bLab);
     }
 }
