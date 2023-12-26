@@ -1,6 +1,19 @@
 using UnityEngine;
 using System.Collections;
 
+[System.Serializable]
+public struct Range
+{
+    public float low;
+    public float high;
+
+    public Range(float low, float high)
+    {
+        this.low = low;
+        this.high = high;
+    }
+}
+
 public class SmartObjectRotator : MonoBehaviour
 {
     public enum TransitionType
@@ -14,29 +27,35 @@ public class SmartObjectRotator : MonoBehaviour
     private float rotationSpeed = 100f;
 
     [SerializeField]
-    private float transitionDuration = 1f;
+    private float timeBeforeInitialRotation = 0f;
 
     [SerializeField]
     private float destinationDuration = 1f;
 
-    [Header("Transition Type")]
+    [SerializeField]
+    private float transitionDuration = 1f;
+
+    private float originalDestinationDuration;
+
+    [SerializeField]
+    private bool randomizeStartRotation = true;
+
     [SerializeField]
     private TransitionType transitionType = TransitionType.Linear;
 
-    [Header("Exponential Logarithmic Settings")]
     [SerializeField]
     private float logarithmicRolloff = 1.0f;
 
-    // Define ranges for each axis
+    // Define ranges for each axis using the custom Range struct
     [Header("Rotation Ranges (-1.0 - 1.0)")]
     [SerializeField]
-    private Vector2 xRange = new Vector2(-1.0f, 1.0f);
+    private Range xRange = new Range(-1.0f, 1.0f);
 
     [SerializeField]
-    private Vector2 yRange = new Vector2(-1.0f, 1.0f);
+    private Range yRange = new Range(-1.0f, 1.0f);
 
     [SerializeField]
-    private Vector2 zRange = new Vector2(-1.0f, 1.0f);
+    private Range zRange = new Range(-1.0f, 1.0f);
 
     [Header("Rotation Values")]
     [SerializeField, Range(-1.0f, 1.0f)]
@@ -50,33 +69,22 @@ public class SmartObjectRotator : MonoBehaviour
 
     private void Start()
     {
-        // Set the initial rotation to a completely random angle
-        xRotation = GetClampedRandomRotation(xRange);
-        yRotation = GetClampedRandomRotation(yRange);
-        zRotation = GetClampedRandomRotation(zRange);
+        // Temporarily set destinationDuration
+        originalDestinationDuration = destinationDuration;
+        destinationDuration = timeBeforeInitialRotation;
+
+        // Debug.Log("Temporary destinationDuration set to:" + " " + timeBeforeInitialRotation);
+
+        if (randomizeStartRotation)
+        {
+            // Set the initial rotation to a completely random angle
+            xRotation = GetClampedRandomRotation(xRange);
+            yRotation = GetClampedRandomRotation(yRange);
+            zRotation = GetClampedRandomRotation(zRange);
+        }
 
         // Rotate the object to the random initial rotation
         transform.Rotate(new Vector3(xRotation, yRotation, zRotation) * rotationSpeed);
-
-        // Start the coroutine for continuous rotation
-        StartCoroutine(ChangeRotation());
-    }
-
-    private IEnumerator TransitionToInitialRotation(Quaternion initialRotation)
-    {
-        float elapsedTime = 0f;
-        float transitionTime = 2f; // You can adjust the duration of the transition
-
-        while (elapsedTime < transitionTime)
-        {
-            float t = elapsedTime / transitionTime;
-            transform.rotation = Quaternion.Slerp(initialRotation, Quaternion.Euler(new Vector3(xRotation, yRotation, zRotation) * rotationSpeed), t);
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
-
-        // Ensure the final rotation exactly matches the random initial rotation
-        transform.rotation = Quaternion.Euler(new Vector3(xRotation, yRotation, zRotation) * rotationSpeed);
 
         // Start the coroutine for continuous rotation
         StartCoroutine(ChangeRotation());
@@ -132,6 +140,11 @@ public class SmartObjectRotator : MonoBehaviour
 
                 elapsedTime += Time.deltaTime;
                 yield return null;
+
+                // Revert destinationDuration back to the original value
+                destinationDuration = originalDestinationDuration;
+
+                // Debug.Log("destinationDuration set to:" + " " + destinationDuration);
             }
 
             // Match the target values
@@ -143,10 +156,10 @@ public class SmartObjectRotator : MonoBehaviour
         }
     }
 
-    private float GetClampedRandomRotation(Vector2 range)
+    private float GetClampedRandomRotation(Range range)
     {
         float[] possibleValues = { -1.0f, -0.9f, -0.8f, -0.7f, -0.6f, -0.5f, -0.4f, -0.3f, -0.2f, -0.1f, 0.0f, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f };
-        return Mathf.Clamp(possibleValues[Random.Range(0, possibleValues.Length)], range.x, range.y);
+        return Mathf.Clamp(possibleValues[Random.Range(0, possibleValues.Length)], range.low, range.high);
     }
 
     private float RoundRotation(float value)
