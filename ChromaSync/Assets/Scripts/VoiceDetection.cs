@@ -140,7 +140,7 @@ public class VoiceDetection : MonoBehaviour
             {
                 Debug.Log($"Invalid command. Expected: stop.");
             }
-            else
+            else if (currentWord.StartsWith(moreKey) || currentWord.StartsWith(lessKey))
             {
                 HandleColorCommand(currentWord);
             }
@@ -226,34 +226,30 @@ public class VoiceDetection : MonoBehaviour
 
             // Only update the Albedo color of the material
             Color newAlbedoColor = new Color(red / 255f, green / 255f, blue / 255f, originalMaterial.color.a);
-            // Debug.Log($"Setting color to: R={Mathf.RoundToInt(newAlbedoColor.r * 255)}, G={Mathf.RoundToInt(newAlbedoColor.g * 255)}, B={Mathf.RoundToInt(newAlbedoColor.b * 255)}, A={newAlbedoColor.a}");
-
             prefabInstance.GetComponent<Renderer>().material.color = newAlbedoColor;
 
             currentColor = new Color(red / 255f, green / 255f, blue / 255f);
-
             prefabInstance.GetComponent<Renderer>().material.color = currentColor;
-
-            // Check if any color channel reaches 0 or 255 and stop the sound
-            if ((red == 0 || red == 255 || green == 0 || green == 255 || blue == 0 || blue == 255) && !stopByColorConditions)
-            {
-                colorSoundManager.StopAllSounds();
-                stopByColorConditions = false; // Set to false to continue listening after the animation
-                lastCommand = stopKey;
-                yield break; // Exit the coroutine early
-            }
 
             // Check if the "stop" command is detected during the animation
             if (lastCommand == stopKey)
             {
                 StopColorAnimation();
-                yield break; // Exit the coroutine early
+                yield break;
+            }
+
+            // Check if any color channel is not changing, indicating it has reached its limit
+            if (previousRed == red && previousGreen == green && previousBlue == blue)
+            {
+                colorSoundManager.StopAllSounds();
+                stopByColorConditions = false;
+                lastCommand = stopKey;
+                yield break;
             }
 
             // Only yield if the color has changed
             if (previousRed != red || previousGreen != green || previousBlue != blue)
             {
-                // Debug.Log($"Increment Values: R = {red}, G = {green}, B = {blue}");
                 yield return new WaitForSeconds(animationSpeed / 255f);
             }
         }
@@ -261,8 +257,6 @@ public class VoiceDetection : MonoBehaviour
         // Stop listening after the animation stops
         StopListening();
     }
-
-
 
     private void StartColorAnimation()
     {
