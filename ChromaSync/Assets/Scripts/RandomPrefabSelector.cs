@@ -8,8 +8,17 @@ public class RandomPrefabSelector : MonoBehaviour
     private GameObject instantiatedPrefab; // Reference to the instantiated prefab
     private bool hasInstantiated = false; // Flag to track if instantiation has occurred
 
-    public void Start()
+    [SerializeField]
+    private ColorAnalyzer colorAnalyzer; // Reference to the ColorAnalyzer script
+
+    void Start()
     {
+        if (colorAnalyzer == null)
+        {
+            Debug.LogError("ColorAnalyzer script reference not set in the inspector.");
+            return;
+        }
+
         if (!hasInstantiated && prefabOptions != null && prefabOptions.Length > 0)
         {
             // Get a random index
@@ -20,6 +29,10 @@ public class RandomPrefabSelector : MonoBehaviour
 
             // Optionally, you can parent the instantiated prefab to the current GameObject
             instantiatedPrefab.transform.SetParent(transform);
+
+            instantiatedPrefab.name = "object";
+
+            Debug.Log("Instantiated Object name:" + " " + instantiatedPrefab.name);
 
             hasInstantiated = true; // Set the flag to true
         }

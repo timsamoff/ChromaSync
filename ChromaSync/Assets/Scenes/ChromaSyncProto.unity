@@ -416,12 +416,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1417352529}
   - component: {fileID: 1417352531}
-  - component: {fileID: 1417352538}
-  - component: {fileID: 1417352537}
   - component: {fileID: 1417352536}
-  - component: {fileID: 1417352530}
   - component: {fileID: 1417352534}
   - component: {fileID: 1417352535}
+  - component: {fileID: 1417352537}
   m_Layer: 0
   m_Name: Object
   m_TagString: Untagged
@@ -444,23 +442,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1417352530
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1417352525}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7b7a0e22b6a8154a94239f9e565f8a5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  similarityThreshold: 10
-  successMessage: You did it!
-  objectRed: 0
-  objectGreen: 0
-  objectBlue: 0
 --- !u!114 &1417352531
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -479,6 +460,7 @@ MonoBehaviour:
   - {fileID: 406769959106717920, guid: 51069d16d3b735145b79583315ecb13d, type: 3}
   - {fileID: 4626858464673485380, guid: ee7d18a8505ce6c4cb1f5cfe11d35ea4, type: 3}
   - {fileID: 4058961992862423930, guid: a50b38884690c3649a5423b1d19b5d40, type: 3}
+  colorAnalyzer: {fileID: 1417352536}
 --- !u!114 &1417352534
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -494,7 +476,7 @@ MonoBehaviour:
   rotationSpeed: 25
   timeBeforeInitialRotation: 0
   destinationDuration: 5
-  transitionDuration: 1
+  transitionDuration: 1.03
   randomizeStartRotation: 1
   transitionType: 1
   logarithmicRolloff: 2
@@ -559,41 +541,110 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1417352525}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 134606598b0dddb4c9c76ab0c60fc6fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  difficultyLevel: 5
---- !u!114 &1417352537
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1417352525}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84820c77f46b81f46be7044a4b470235, type: 3}
+  m_Script: {fileID: 11500000, guid: 4e930700fba0a9d498aed43cdb33743d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   difficultyLevel: 10
---- !u!114 &1417352538
-MonoBehaviour:
+  sound: {fileID: 0}
+  thirdChannelSound: {fileID: 0}
+--- !u!82 &1417352537
+AudioSource:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1417352525}
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32908f54fd0d4f4428ff6e7a8fc14011, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  objectMaterial: {fileID: 2100000, guid: 37393d865756989458d9d288b1a99129, type: 2}
-  difficultyLevel: 5
-  delayBeforeRestart: 5
-  expectedColor: {r: 0, g: 0, b: 0, a: 0}
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1575953980
 GameObject:
   m_ObjectHideFlags: 0
@@ -604,7 +655,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1575953982}
   - component: {fileID: 1575953983}
-  - component: {fileID: 1575953987}
   - component: {fileID: 1575953986}
   - component: {fileID: 1575953981}
   - component: {fileID: 1575953985}
@@ -629,7 +679,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animationSpeed: 20
-  startingColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  startingColor: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 1}
   prefabSelector: {fileID: 1417352531}
   red: 0
   green: 0
@@ -792,19 +842,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca42f81ff9ceb0143b5f30262e5ee8e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1575953987
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1575953980}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ba5eac07fa755e4381e122ff2b32264, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  prefabPrefab: {fileID: 1417352525}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
