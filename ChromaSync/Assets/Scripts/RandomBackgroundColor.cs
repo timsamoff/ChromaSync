@@ -2,9 +2,16 @@ using UnityEngine;
 
 public class RandomBackgroundColor : MonoBehaviour
 {
+    // Event for background color changes
+    public delegate void BackgroundColorChanged(Color newColor);
+    public static event BackgroundColorChanged OnBackgroundColorChanged;
+
     private Color[] validColors;  // Precomputed list of valid colors
 
-    private void Start()
+    // Property to get the current background color
+    public static Color CurrentBackgroundColor { get; private set; }
+
+    void Start()
     {
         // Precompute the list of valid colors during development
         PrecomputeValidColors();
@@ -28,18 +35,21 @@ public class RandomBackgroundColor : MonoBehaviour
         }
     }
 
-    private void ChangeBackgroundColor()
+    public void ChangeBackgroundColor()
     {
         // Select a random color from the precomputed list
-        Color randomColor = validColors[Random.Range(0, validColors.Length)];
+        Color newColor = validColors[Random.Range(0, validColors.Length)];
+
+        // Notify subscribers (e.g., ColorAnalyzer) that the background color has changed
+        OnBackgroundColorChanged?.Invoke(newColor);
+
+        // Update the current background color property
+        CurrentBackgroundColor = newColor;
 
         // Apply the random color as the background color
-        Camera.main.backgroundColor = randomColor;
+        Camera.main.backgroundColor = newColor;
 
-        // Debug the RGB values as integers
-        Debug.Log($"Background Color Changed to: R = {Mathf.RoundToInt(randomColor.r * 255f)}, " +
-                  $"G = {Mathf.RoundToInt(randomColor.g * 255f)}, " +
-                  $"B = {Mathf.RoundToInt(randomColor.b * 255f)}");
+        Debug.Log("Background Color Changed to: R = " + (int)(newColor.r * 255) + ", G = " + (int)(newColor.g * 255) + ", B = " + (int)(newColor.b * 255));
     }
 
     private Color GetRandomColor()
