@@ -267,6 +267,13 @@ public class VoiceDetection : MonoBehaviour
             // Only yield if the color has changed
             if (previousRed != red || previousGreen != green || previousBlue != blue)
             {
+                Color newColor = new Color(red / 255f, green / 255f, blue / 255f);
+                prefabInstance.GetComponent<Renderer>().material.color = newColor;
+                currentColor = newColor;
+
+                // Trigger the color change event
+                ColorChangeEvent.TriggerColorChange(newColor);
+
                 yield return new WaitForSeconds(animationSpeed / 255f);
             }
         }
