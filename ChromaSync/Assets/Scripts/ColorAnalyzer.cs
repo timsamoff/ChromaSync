@@ -28,6 +28,9 @@ public class ColorAnalyzer : MonoBehaviour
 
         // Call the method to update materialAlbedoColor initially
         UpdateMaterialAlbedoColor();
+
+        // Subscribe to the color change event
+        ColorChangeEvent.OnColorChange += OnColorChange;
     }
 
     void Update()
@@ -137,6 +140,17 @@ public class ColorAnalyzer : MonoBehaviour
             case 2: return "Blue";
             default: return "Unknown";
         }
+    }
+
+    private void OnColorChange(Color newColor)
+    {
+        // Check if the current color is within the acceptable range of the background color channel
+        CheckColorChannel(0, newColor.r * 255, redMatchSound);
+        CheckColorChannel(1, newColor.g * 255, greenMatchSound);
+        CheckColorChannel(2, newColor.b * 255, blueMatchSound);
+
+        // Update materialAlbedoColor in real-time
+        UpdateMaterialAlbedoColor();
     }
 }
 
