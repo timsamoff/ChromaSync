@@ -3,7 +3,9 @@ using UnityEngine;
 public class ColorAnalyzer : MonoBehaviour
 {
     [SerializeField] private int difficultyLevel = 10;
-    [SerializeField] private AudioClip matchSound;
+    [SerializeField] private AudioClip redMatchSound;
+    [SerializeField] private AudioClip greenMatchSound;
+    [SerializeField] private AudioClip blueMatchSound;
     [SerializeField] private AudioClip completionSound;
 
     private bool completionTriggered = false;
@@ -13,8 +15,11 @@ public class ColorAnalyzer : MonoBehaviour
     // Expose this property to display material albedo color in the Inspector
     [ReadOnly][SerializeField] private Color materialAlbedoColor;
 
+    // Array to track whether the sound for each channel has been played since the last satisfaction
+    private bool[] soundPlayedThisSatisfaction = new bool[3];
+
     // Count for keeping track of the number of channels satisfied
-    private int channelsSatisfiedCount = 0;
+    private int[] channelsSatisfiedCount = new int[3];
 
     void Start()
     {
@@ -34,11 +39,11 @@ public class ColorAnalyzer : MonoBehaviour
     void MonitorAndCompareColors()
     {
         // Check red channel
-        CheckColorChannel(0, materialAlbedoColor.r * 255);
+        CheckColorChannel(0, materialAlbedoColor.r * 255, redMatchSound);
         // Check green channel
-        CheckColorChannel(1, materialAlbedoColor.g * 255);
+        CheckColorChannel(1, materialAlbedoColor.g * 255, greenMatchSound);
         // Check blue channel
-        CheckColorChannel(2, materialAlbedoColor.b * 255);
+        CheckColorChannel(2, materialAlbedoColor.b * 255, blueMatchSound);
 
         // Update materialAlbedoColor in real-time
         UpdateMaterialAlbedoColor();
@@ -68,7 +73,7 @@ public class ColorAnalyzer : MonoBehaviour
         }
     }
 
-    void CheckColorChannel(int channel, float currentColor)
+    void CheckColorChannel(int channel, float currentColor, AudioClip matchSound)
     {
         if (completionTriggered)
         {
@@ -89,16 +94,17 @@ public class ColorAnalyzer : MonoBehaviour
             Debug.Log($"{channelName} satisfied!");
 
             // Play matchSound audio whenever a channel becomes satisfied
-            if (matchSound != null && audioSource != null)
+            if (matchSound != null && audioSource != null && !soundPlayedThisSatisfaction[channel])
             {
                 audioSource.PlayOneShot(matchSound);
+                soundPlayedThisSatisfaction[channel] = true; // Mark sound as played for this satisfaction
             }
 
-            // Increment the count of satisfied channels
-            channelsSatisfiedCount++;
+            // Increment the count of satisfied channels for this color
+            channelsSatisfiedCount[channel]++;
 
             // Check if all three channels are satisfied
-            if (channelsSatisfiedCount == 3 && !completionTriggered)
+            if (channelsSatisfiedCount[0] > 0 && channelsSatisfiedCount[1] > 0 && channelsSatisfiedCount[2] > 0 && !completionTriggered)
             {
                 completionTriggered = true;
 
@@ -106,14 +112,18 @@ public class ColorAnalyzer : MonoBehaviour
                 if (completionSound != null && audioSource != null)
                 {
                     audioSource.PlayOneShot(completionSound);
+                    // Call the new function (commented pseudo code)
+                    // YourFunction();
+                    Time.timeScale = 0;
                 }
                 Debug.Log("Complete!");
             }
         }
         else
         {
-            // If the condition is not satisfied, reset the count
-            channelsSatisfiedCount = 0;
+            // If the condition is not satisfied, reset the count and soundPlayedThisSatisfaction for this color
+            channelsSatisfiedCount[channel] = 0;
+            soundPlayedThisSatisfaction[channel] = false;
         }
     }
 
