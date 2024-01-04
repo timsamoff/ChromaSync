@@ -12,7 +12,7 @@ public class VoiceDetection : MonoBehaviour
 
     [SerializeField] private Color startingColor = new Color(1.0f, 1.0f, 1.0f, 1.0f); // Default color with alpha
 
-    [SerializeField] private RandomPrefabSelector prefabSelector; // Reference to the script attached to the empty GameObject
+    private RandomPrefabSelector prefabSelector;
 
     private GameObject prefabInstance; // Reference to the instantiated prefab
     private Material originalMaterial;
@@ -71,7 +71,24 @@ public class VoiceDetection : MonoBehaviour
 
     private void Start()
     {
-        prefabInstance = prefabSelector.GetInstantiatedPrefab();
+        prefabSelector = FindObjectOfType<RandomPrefabSelector>();
+
+        if (prefabSelector == null)
+        {
+            Debug.LogError("RandomPrefabSelector script reference not found!");
+        }
+        else
+        {
+            prefabInstance = prefabSelector.GetInstantiatedPrefab();
+            if (prefabInstance == null)
+            {
+                Debug.LogError("Prefab instance reference not found!");
+            }
+            else
+            {
+                Debug.Log("RandomPrefabSelector and PrefabInstance references found!");
+            }
+        }
 
         // Use the original material of the prefab
         originalMaterial = prefabInstance.GetComponent<Renderer>().material;
