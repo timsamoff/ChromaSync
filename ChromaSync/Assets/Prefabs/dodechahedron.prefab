@@ -98,7 +98,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   difficultyLevel: 10
-  matchSound: {fileID: 8300000, guid: 3c9a9873b8c2b294d9532590dba9a2df, type: 3}
+  redMatchSound: {fileID: 8300000, guid: 3c9a9873b8c2b294d9532590dba9a2df, type: 3}
+  greenMatchSound: {fileID: 8300000, guid: 3c9a9873b8c2b294d9532590dba9a2df, type: 3}
+  blueMatchSound: {fileID: 8300000, guid: 3c9a9873b8c2b294d9532590dba9a2df, type: 3}
   completionSound: {fileID: 8300000, guid: 3c9a9873b8c2b294d9532590dba9a2df, type: 3}
   materialAlbedoColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!82 &4904581922193514285
