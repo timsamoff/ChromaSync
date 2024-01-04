@@ -416,7 +416,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1417352529}
   - component: {fileID: 1417352531}
-  - component: {fileID: 1417352536}
   - component: {fileID: 1417352534}
   - component: {fileID: 1417352535}
   - component: {fileID: 1417352537}
@@ -460,7 +459,7 @@ MonoBehaviour:
   - {fileID: 406769959106717920, guid: 51069d16d3b735145b79583315ecb13d, type: 3}
   - {fileID: 4626858464673485380, guid: ee7d18a8505ce6c4cb1f5cfe11d35ea4, type: 3}
   - {fileID: 4058961992862423930, guid: a50b38884690c3649a5423b1d19b5d40, type: 3}
-  colorAnalyzer: {fileID: 1417352536}
+  colorAnalyzer: {fileID: -1793171421860519317, guid: 469feb615d03ff34f87b3f63447b2056, type: 3}
 --- !u!114 &1417352534
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -534,21 +533,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &1417352536
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1417352525}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e930700fba0a9d498aed43cdb33743d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  difficultyLevel: 10
-  sound: {fileID: 0}
-  thirdChannelSound: {fileID: 0}
 --- !u!82 &1417352537
 AudioSource:
   m_ObjectHideFlags: 0
@@ -680,7 +664,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animationSpeed: 20
   startingColor: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 1}
-  prefabSelector: {fileID: 1417352531}
   red: 0
   green: 0
   blue: 0

@@ -6,122 +6,129 @@ public class ColorAnalyzer : MonoBehaviour
     [SerializeField] private AudioClip matchSound;
     [SerializeField] private AudioClip completionSound;
 
-    private Material material;
-
-    private int satisfiedChannelsCount = 0;
     private bool completionTriggered = false;
 
     private AudioSource audioSource;
 
+    // Expose this property to display material albedo color in the Inspector
+    [ReadOnly][SerializeField] private Color materialAlbedoColor;
+
+    // Count for keeping track of the number of channels satisfied
+    private int channelsSatisfiedCount = 0;
+
     void Start()
     {
-        material = GetComponent<Renderer>().material;
-
-        // Subscribe to the background color change event
-        RandomBackgroundColor.OnBackgroundColorChanged += OnBackgroundColorChanged;
-
         // Assuming you have an AudioSource component attached to the same GameObject
         audioSource = GetComponent<AudioSource>();
-    }
 
-    void OnDestroy()
-    {
-        // Unsubscribe from the background color change event to avoid memory leaks
-        RandomBackgroundColor.OnBackgroundColorChanged -= OnBackgroundColorChanged;
-    }
-
-    void OnBackgroundColorChanged(Color newColor)
-    {
-        // Handle the background color change here
-        Debug.Log("Background Color: R=" + (int)(newColor.r * 255) + ", G=" + (int)(newColor.g * 255) + ", B=" + (int)(newColor.b * 255));
-
-        // Trigger your color analysis logic here if needed
-        CheckColorChannels();
+        // Call the method to update materialAlbedoColor initially
+        UpdateMaterialAlbedoColor();
     }
 
     void Update()
     {
-        // Other update logic if needed
+        // Continually monitor and compare colors in real-time
+        MonitorAndCompareColors();
     }
 
-    void CheckColorChannels()
+    void MonitorAndCompareColors()
     {
-        // Your color analysis logic goes here
-        CheckColorChannel(0, material.color.r * 255, PlayFirstTwoChannels); // Check red channel
-        CheckColorChannel(1, material.color.g * 255, PlayFirstTwoChannels); // Check green channel
-        CheckColorChannel(2, material.color.b * 255, PlayThirdChannel); // Check blue channel
+        // Check red channel
+        CheckColorChannel(0, materialAlbedoColor.r * 255);
+        // Check green channel
+        CheckColorChannel(1, materialAlbedoColor.g * 255);
+        // Check blue channel
+        CheckColorChannel(2, materialAlbedoColor.b * 255);
+
+        // Update materialAlbedoColor in real-time
+        UpdateMaterialAlbedoColor();
     }
 
-    void CheckColorChannel(int channel, float currentColor, System.Action callback)
+    float GetBackgroundChannel(int channel)
     {
-        float backgroundChannel = 0f;
+        return RandomBackgroundColor.CurrentBackgroundColor[channel] * 255;
+    }
 
-        // Set the background color channel based on the current channel
-        switch (channel)
+    float CalculateThreshold(int channel, float backgroundChannel)
+    {
+        // Calculate the threshold based on the difficultyLevel
+        return difficultyLevel > 0 ? difficultyLevel : 1; // Ensure threshold is at least 1
+    }
+
+    void UpdateMaterialAlbedoColor()
+    {
+        // Assuming the material is directly on the object
+        if (TryGetComponent<Renderer>(out Renderer renderer) && renderer.material != null)
         {
-            case 0:
-                backgroundChannel = RandomBackgroundColor.CurrentBackgroundColor.r * 255;
-                break;
-            case 1:
-                backgroundChannel = RandomBackgroundColor.CurrentBackgroundColor.g * 255;
-                break;
-            case 2:
-                backgroundChannel = RandomBackgroundColor.CurrentBackgroundColor.b * 255;
-                break;
+            materialAlbedoColor = renderer.material.color;
+        }
+        else
+        {
+            Debug.LogError("The object must have a Renderer component with a material assigned.");
+        }
+    }
+
+    void CheckColorChannel(int channel, float currentColor)
+    {
+        if (completionTriggered)
+        {
+            // If completion is triggered, stop checking
+            return;
         }
 
-        // Debug.Log("Object Color: R=" + (int)(material.color.r * 255) + ", G=" + (int)(material.color.g * 255) + ", B=" + (int)(material.color.b * 255));
+        string channelName = GetChannelName(channel);
+        float backgroundChannel = GetBackgroundChannel(channel);
+        float threshold = CalculateThreshold(channel, backgroundChannel);
+
+        // Log relevant values for debugging
+        Debug.Log($"{channelName} - Current Color: {currentColor}, Background Channel: {backgroundChannel}, Threshold: {threshold}");
 
         // Check if the current color is within the acceptable range of the background color channel
-        if (Mathf.Abs(currentColor - backgroundChannel) <= difficultyLevel)
+        if (Mathf.Abs(currentColor - backgroundChannel) <= threshold)
         {
-            // Channel satisfied, execute callback based on the channel
-            if (channel == 0)
+            Debug.Log($"{channelName} satisfied!");
+
+            // Play matchSound audio whenever a channel becomes satisfied
+            if (matchSound != null && audioSource != null)
             {
-                satisfiedChannelsCount = Mathf.Max(1, satisfiedChannelsCount);
-                callback.Invoke();
+                audioSource.PlayOneShot(matchSound);
             }
-            else if (channel == 1 && satisfiedChannelsCount == 1)
+
+            // Increment the count of satisfied channels
+            channelsSatisfiedCount++;
+
+            // Check if all three channels are satisfied
+            if (channelsSatisfiedCount == 3 && !completionTriggered)
             {
-                satisfiedChannelsCount = Mathf.Max(2, satisfiedChannelsCount);
-                callback.Invoke();
+                completionTriggered = true;
+
+                // Play completionSound audio
+                if (completionSound != null && audioSource != null)
+                {
+                    audioSource.PlayOneShot(completionSound);
+                }
+                Debug.Log("Complete!");
             }
-            else if (channel == 2 && satisfiedChannelsCount == 2)
-            {
-                satisfiedChannelsCount = Mathf.Max(3, satisfiedChannelsCount);
-                callback.Invoke();
-            }
-            else
-            {
-                satisfiedChannelsCount = Mathf.Max(0, satisfiedChannelsCount - 1);
-            }
+        }
+        else
+        {
+            // If the condition is not satisfied, reset the count
+            channelsSatisfiedCount = 0;
         }
     }
 
-    void PlayFirstTwoChannels()
+    string GetChannelName(int channel)
     {
-        // Your logic for playing sound for the first two channels
-        // Example: Play sound
-        if (matchSound != null && audioSource != null)
+        // Convert channel index to channel name
+        switch (channel)
         {
-            audioSource.PlayOneShot(matchSound);
+            case 0: return "Red";
+            case 1: return "Green";
+            case 2: return "Blue";
+            default: return "Unknown";
         }
     }
-
-    void PlayThirdChannel()
-    {
-        // Your logic for playing sound for the third channel
-        // Example: Play sound and complete
-        if (satisfiedChannelsCount == 3 && !completionTriggered)
-        {
-            completionTriggered = true;
-            if (completionSound != null && audioSource != null)
-            {
-                audioSource.PlayOneShot(completionSound);
-            }
-            Debug.Log("Complete!");
-        }
-    }
-
-    // Other methods as needed
 }
+
+// Custom attribute to make a field read-only in the Inspector
+public class ReadOnlyAttribute : PropertyAttribute { }
